@@ -61,3 +61,24 @@ export class PaymentExceedsOutstandingError extends DomainError {
     );
   }
 }
+
+/** Numbers the organizer acted on that are not reserved by anyone. */
+export class TicketNumbersNotReservedError extends DomainError {
+  readonly code = 'TICKET_NUMBERS_NOT_RESERVED';
+
+  constructor(readonly numbers: readonly number[]) {
+    super(`Numbers not reserved: ${numbers.join(', ')}`);
+  }
+}
+
+/**
+ * Releasing a ticket that already collected money would silently lose the
+ * payment trail, so the refund has to be dealt with first.
+ */
+export class TicketHasPaymentsError extends DomainError {
+  readonly code = 'TICKET_HAS_PAYMENTS';
+
+  constructor(readonly numbers: readonly number[]) {
+    super(`Numbers with payments already recorded: ${numbers.join(', ')}`);
+  }
+}
