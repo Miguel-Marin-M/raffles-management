@@ -17,6 +17,7 @@
     "db:generate": "npm run db:generate --workspace @rifas/api",
     "db:migrate": "npm run db:migrate --workspace @rifas/api",
     "db:studio": "npm run db:studio --workspace @rifas/api",
+    "dev": "npm run dev --workspace @rifas/api",
     "build": "npm run build --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
