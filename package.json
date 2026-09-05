@@ -2,7 +2,7 @@
   "name": "rifas",
   "version": "0.1.0",
   "private": true,
-  "description": "Sistema de gestión de rifas para organizadores",
+  "description": "Raffle management system for organizers",
   "type": "module",
   "engines": {
     "node": ">=22"

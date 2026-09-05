@@ -1,12 +1,12 @@
-# Normaliza finales de línea: LF en el repositorio, nativo en el working tree
+# LF in the repository, native line endings in the working tree
 * text=auto eol=lf
 
-# Scripts de Windows conservan CRLF
+# Windows scripts keep CRLF
 *.bat text eol=crlf
 *.cmd text eol=crlf
 *.ps1 text eol=crlf
 
-# Binarios
+# Binaries
 *.png binary
 *.jpg binary
 *.jpeg binary

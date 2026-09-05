@@ -1,4 +1,4 @@
-# Dependencias
+# Dependencies
 node_modules/
 .npm/
 
@@ -7,7 +7,7 @@ dist/
 build/
 *.tsbuildinfo
 
-# Entorno
+# Environment
 .env
 .env.*
 !.env.example
@@ -17,14 +17,14 @@ build/
 npm-debug.log*
 logs/
 
-# Editores y sistema operativo
+# Editors and OS
 .DS_Store
 Thumbs.db
 .idea/
 .vscode/*
 !.vscode/extensions.json
 
-# Cachés de herramientas
+# Tool caches
 .cache/
 coverage/
 .vite/
