@@ -1,0 +1,142 @@
+@import 'tailwindcss';
+
+/*
+ * The visual language comes from the printed raffle poster this app replaces:
+ * newsprint paper, ink numerals, a red stamp for what is taken and a pen
+ * stroke through what has been paid.
+ */
+@theme {
+  --font-display: 'Archivo', system-ui, sans-serif;
+  --font-sans: 'Instrument Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --color-papel: #e9e7e1;
+  --color-papel-alto: #f4f2ee;
+  --color-tinta: #131a24;
+  --color-tinta-suave: #5b6472;
+  --color-linea: #c9c5bb;
+  --color-sello: #c8362a;
+  --color-cancelado: #2f6b4f;
+  --color-loteria: #e8b93b;
+
+  --radius-celda: 3px;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-papel);
+    color: var(--color-tinta);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.5;
+    /* Newsprint grain: subtle enough to read as paper, not as texture. */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E");
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-tinta);
+    outline-offset: 2px;
+  }
+
+  button {
+    font: inherit;
+  }
+}
+
+@layer components {
+  /* Small caps label used for section headers and field names. */
+  .rotulo {
+    font-family: var(--font-display);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-tinta-suave);
+  }
+
+  .cifra {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+
+  .boton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 48px;
+    padding: 0 1.125rem;
+    border: 1px solid var(--color-tinta);
+    border-radius: 2px;
+    background-color: var(--color-tinta);
+    color: var(--color-papel-alto);
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    transition: transform 120ms ease;
+  }
+
+  .boton:active {
+    transform: translateY(1px);
+  }
+
+  .boton:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .boton-secundario {
+    background-color: transparent;
+    color: var(--color-tinta);
+  }
+
+  .campo {
+    width: 100%;
+    min-height: 48px;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--color-linea);
+    border-radius: 2px;
+    background-color: var(--color-papel-alto);
+    color: var(--color-tinta);
+  }
+
+  .campo::placeholder {
+    color: color-mix(in srgb, var(--color-tinta-suave) 70%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* The pen stroke that crosses out a paid number. */
+@keyframes tachar {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
