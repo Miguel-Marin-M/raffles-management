@@ -50,6 +50,13 @@ export class InMemoryCustomerRepository implements CustomerRepository {
     return snapshot === undefined ? null : Customer.restore(snapshot);
   }
 
+  async findManyByIds(customerIds: readonly string[]): Promise<Customer[]> {
+    return customerIds
+      .map((id) => this.db.customers.get(id))
+      .filter((snapshot) => snapshot !== undefined)
+      .map((snapshot) => Customer.restore(snapshot));
+  }
+
   async findByPhone(ownerId: string, phone: string): Promise<Customer | null> {
     const match = [...this.db.customers.values()].find(
       (customer) => customer.ownerId === ownerId && customer.phone === phone,
