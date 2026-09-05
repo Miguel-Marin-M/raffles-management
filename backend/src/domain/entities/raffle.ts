@@ -200,12 +200,21 @@ export class Raffle {
     this.currentPrizes = Raffle.validatePrizes(prizes);
   }
 
+  /**
+   * Moves the raffle through its lifecycle. Every transition is allowed,
+   * including reopening a closed raffle, because a raffle can be postponed or
+   * closed by mistake and the organizer is the authority on that.
+   */
+  changeStatus(status: RaffleStatus): void {
+    this.currentStatus = status;
+  }
+
   activate(): void {
-    this.currentStatus = 'active';
+    this.changeStatus('active');
   }
 
   close(): void {
-    this.currentStatus = 'closed';
+    this.changeStatus('closed');
   }
 
   toSnapshot(): RaffleSnapshot {
