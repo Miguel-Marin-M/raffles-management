@@ -10,7 +10,9 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true,
-    "exactOptionalPropertyTypes": true,
+    // exactOptionalPropertyTypes is deliberately off: request payloads validated
+    // with Zod produce `T | null | undefined` for optional fields, and the flag
+    // forces every controller to rebuild objects key by key to satisfy it.
     "forceConsistentCasingInFileNames": true,
 
     "declaration": true,
