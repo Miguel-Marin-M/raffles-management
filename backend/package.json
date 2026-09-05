@@ -12,9 +12,11 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:int": "vitest run --config vitest.integration.config.ts"
   },
   "dependencies": {
+    "@node-rs/argon2": "^2.2.0",
     "drizzle-orm": "^0.45.2",
     "postgres": "^3.4.9"
   },
