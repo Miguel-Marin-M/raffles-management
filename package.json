@@ -1,0 +1,25 @@
+{
+  "name": "rifas",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Sistema de gestión de rifas para organizadores",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "workspaces": [
+    "backend"
+  ],
+  "scripts": {
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:logs": "docker compose logs -f postgres",
+    "db:generate": "npm run db:generate --workspace @rifas/api",
+    "db:migrate": "npm run db:migrate --workspace @rifas/api",
+    "db:studio": "npm run db:studio --workspace @rifas/api",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  }
+}
