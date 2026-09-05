@@ -1,7 +1,9 @@
 import { Customer } from '../../domain/entities/customer.js';
+import { Payment } from '../../domain/entities/payment.js';
 import { Raffle } from '../../domain/entities/raffle.js';
 import { Ticket } from '../../domain/entities/ticket.js';
 import type { CustomerRepository } from '../../domain/ports/customer-repository.js';
+import type { PaymentRepository } from '../../domain/ports/payment-repository.js';
 import type { RaffleRepository } from '../../domain/ports/raffle-repository.js';
 import type {
   TicketEvent,
@@ -128,5 +130,20 @@ export class InMemoryTicketEventRecorder implements TicketEventRecorder {
 
   async record(events: readonly TicketEvent[]): Promise<void> {
     this.db.ticketEvents.push(...events);
+  }
+}
+
+export class InMemoryPaymentRepository implements PaymentRepository {
+  constructor(private readonly db: InMemoryDatabase) {}
+
+  async add(payment: Payment): Promise<void> {
+    this.db.payments.set(payment.id, payment.toSnapshot());
+  }
+
+  async findByTicket(ticketId: string): Promise<Payment[]> {
+    return [...this.db.payments.values()]
+      .filter((payment) => payment.ticketId === ticketId)
+      .sort((a, b) => a.paidAt.getTime() - b.paidAt.getTime())
+      .map((payment) => Payment.restore(payment));
   }
 }

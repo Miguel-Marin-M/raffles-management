@@ -2,6 +2,7 @@ import type { Repositories, UnitOfWork } from '../../domain/ports/unit-of-work.j
 import { InMemoryDatabase } from './in-memory-database.js';
 import {
   InMemoryCustomerRepository,
+  InMemoryPaymentRepository,
   InMemoryRaffleRepository,
   InMemoryTicketEventRecorder,
   InMemoryTicketRepository,
@@ -20,6 +21,7 @@ export class InMemoryUnitOfWork implements UnitOfWork {
       raffles: new InMemoryRaffleRepository(db),
       customers: new InMemoryCustomerRepository(db),
       tickets: new InMemoryTicketRepository(db),
+      payments: new InMemoryPaymentRepository(db),
       ticketEvents: new InMemoryTicketEventRecorder(db),
     };
   }
