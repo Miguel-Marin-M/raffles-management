@@ -233,7 +233,6 @@ export function RaffleLayout(): React.JSX.Element {
               cell={openCell}
               raffleId={raffleId}
               currency={raffle.currency}
-              ticketPriceMinorUnits={raffle.ticketPriceMinorUnits}
               busy={busy}
               onMarkAsPaid={() => {
                 markAsPaid.mutate([openCell.number]);

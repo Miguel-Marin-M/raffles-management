@@ -12,7 +12,6 @@ interface TicketDetailProps {
   readonly cell: BoardCell;
   readonly raffleId: string;
   readonly currency: string;
-  readonly ticketPriceMinorUnits: number;
   readonly busy: boolean;
   readonly onMarkAsPaid: () => void;
   readonly onRelease: () => void;
@@ -31,7 +30,6 @@ export function TicketDetail({
   cell,
   raffleId,
   currency,
-  ticketPriceMinorUnits,
   busy,
   onMarkAsPaid,
   onRelease,
@@ -120,7 +118,7 @@ export function TicketDetail({
                 onChange={(event) => {
                   setPartial(event.target.value);
                 }}
-                placeholder={String(Math.round(ticketPriceMinorUnits / 2))}
+                placeholder="Cuánto te está abonando"
               />
             </label>
             <button
@@ -145,7 +143,12 @@ export function TicketDetail({
 
       {paid ? null : reassigning ? (
         <div className="flex flex-col gap-3 border-t border-rule pt-4">
-          <CustomerPicker onChange={setNewCustomer} raffleId={raffleId} autoFocus />
+          <CustomerPicker
+            onChange={setNewCustomer}
+            raffleId={raffleId}
+            namePlaceholder="Nombre de quién recibe la boleta"
+            autoFocus
+          />
           <div className="flex gap-2">
             <button
               type="button"

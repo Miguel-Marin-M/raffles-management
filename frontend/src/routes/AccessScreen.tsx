@@ -54,6 +54,7 @@ export function AccessScreen(): React.JSX.Element {
                 setName(event.target.value);
               }}
               autoComplete="name"
+              placeholder="Tu nombre"
               required
             />
           </label>
@@ -69,6 +70,7 @@ export function AccessScreen(): React.JSX.Element {
               setEmail(event.target.value);
             }}
             autoComplete="email"
+            placeholder="Tu correo"
             required
           />
         </label>
@@ -83,6 +85,7 @@ export function AccessScreen(): React.JSX.Element {
               setPassword(event.target.value);
             }}
             autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+            placeholder={mode === 'login' ? 'Tu contraseña' : 'Mínimo 8 caracteres'}
             minLength={mode === 'register' ? 8 : undefined}
             required
           />

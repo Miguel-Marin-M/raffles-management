@@ -70,7 +70,7 @@ export function PrizeWinners({
               onChange={(event) => {
                 setSameForAll(event.target.value);
               }}
-              placeholder={String(raffle.numberMax)}
+              placeholder="El número que salió"
             />
           </label>
           <button
@@ -130,7 +130,7 @@ export function PrizeWinners({
                       onChange={(event) => {
                         setDrafts({ ...drafts, [prize.id]: event.target.value });
                       }}
-                      placeholder="—"
+                      placeholder="El número que salió"
                     />
                   </label>
                   <button

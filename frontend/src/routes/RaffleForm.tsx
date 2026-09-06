@@ -89,7 +89,7 @@ export function RaffleForm({
           onChange={(event) => {
             setName(event.target.value);
           }}
-          placeholder="Rifa de la moto"
+          placeholder="El nombre de tu rifa"
           required
         />
       </label>
@@ -105,7 +105,7 @@ export function RaffleForm({
           onChange={(event) => {
             setPrice(event.target.value);
           }}
-          placeholder="10000"
+          placeholder="Cuánto vale cada boleta"
           required
         />
         {editing ? (
@@ -149,7 +149,7 @@ export function RaffleForm({
             onChange={(event) => {
               setLottery(event.target.value);
             }}
-            placeholder="Lotería de Medellín"
+            placeholder="Con qué lotería juega"
           />
         </label>
         <label className="flex flex-col gap-1">
@@ -178,7 +178,7 @@ export function RaffleForm({
               onChange={(event) => {
                 setPrizes(prizes.map((item, at) => (at === index ? event.target.value : item)));
               }}
-              placeholder={index === 0 ? 'Moto Bajaj Boxer' : 'Otro premio'}
+              placeholder="Qué se gana en este premio"
             />
             {prizes.length > 1 ? (
               <button

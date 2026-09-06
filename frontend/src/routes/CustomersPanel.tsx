@@ -385,7 +385,7 @@ export function CustomersPanel({
               onChange={(event) => {
                 setAmount(event.target.value);
               }}
-              placeholder={String(Math.round(selectedTotal / 2))}
+              placeholder="Cuánto te está abonando"
               autoFocus
             />
           </label>
@@ -437,7 +437,12 @@ export function CustomersPanel({
             </p>
           </div>
 
-          <CustomerPicker onChange={setNewCustomer} raffleId={raffle.id} autoFocus />
+          <CustomerPicker
+            onChange={setNewCustomer}
+            raffleId={raffle.id}
+            namePlaceholder="Nombre de quién recibe las boletas"
+            autoFocus
+          />
 
           <button
             type="button"

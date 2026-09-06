@@ -7,6 +7,8 @@ interface CustomerPickerProps {
   readonly onChange: (customer: CustomerInput | null) => void;
   /** Restricts the suggestions to buyers of this raffle. */
   readonly raffleId: string;
+  /** What the name field asks for, which depends on why it is being asked. */
+  readonly namePlaceholder?: string;
   readonly autoFocus?: boolean;
 }
 
@@ -22,6 +24,7 @@ interface CustomerPickerProps {
 export function CustomerPicker({
   onChange,
   raffleId,
+  namePlaceholder = 'Nombre de quién compra la boleta',
   autoFocus,
 }: CustomerPickerProps): React.JSX.Element {
   const [term, setTerm] = useState('');
@@ -65,7 +68,7 @@ export function CustomerPicker({
           onChange={(event) => {
             typeName(event.target.value);
           }}
-          placeholder="Ana Torres"
+          placeholder={namePlaceholder}
           autoComplete="off"
           required
           autoFocus={autoFocus}
@@ -120,7 +123,7 @@ export function CustomerPicker({
           onChange={(event) => {
             typePhone(event.target.value);
           }}
-          placeholder="300 111 2233"
+          placeholder="Su número de contacto"
           disabled={picked !== null}
         />
         {picked === null ? (

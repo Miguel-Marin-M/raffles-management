@@ -60,7 +60,7 @@ export function AddPhone({ customerId, onSaved }: AddPhoneProps): React.JSX.Elem
             onChange={(event) => {
               setPhone(event.target.value);
             }}
-            placeholder="300 111 2233"
+            placeholder="Su número de contacto"
             autoFocus
           />
         </label>
