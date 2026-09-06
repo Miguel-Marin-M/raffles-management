@@ -5,22 +5,32 @@ import { api, type Customer, type CustomerInput } from '../lib/rifas-api';
 
 interface CustomerPickerProps {
   readonly onChange: (customer: CustomerInput | null) => void;
+  /** Restricts the suggestions to buyers of this raffle. */
+  readonly raffleId: string;
   readonly autoFocus?: boolean;
 }
 
 /**
- * Names a customer, either by picking one already on file or by typing a new
- * one. The organizer types a name in both cases, so there is a single field
- * and the matches appear underneath while typing.
+ * Names a customer, either by picking one already buying in this raffle or by
+ * typing a new one.
+ *
+ * Suggestions are limited to this raffle: the common case is the buyer coming
+ * back for more numbers, and offering the whole address book puts people from
+ * other raffles in the way. Somebody from another raffle is recognized by their
+ * phone, which the reservation reports as a conflict to merge.
  */
-export function CustomerPicker({ onChange, autoFocus }: CustomerPickerProps): React.JSX.Element {
+export function CustomerPicker({
+  onChange,
+  raffleId,
+  autoFocus,
+}: CustomerPickerProps): React.JSX.Element {
   const [term, setTerm] = useState('');
   const [phone, setPhone] = useState('');
   const [picked, setPicked] = useState<Customer | null>(null);
 
   const matches = useQuery({
-    queryKey: ['customers', term],
-    queryFn: () => api.searchCustomers(term),
+    queryKey: ['customers', raffleId, term],
+    queryFn: () => api.searchCustomers(term, raffleId),
     enabled: picked === null && term.trim().length >= 2,
     staleTime: 30_000,
   });
