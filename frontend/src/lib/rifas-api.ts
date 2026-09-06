@@ -136,6 +136,9 @@ export const api = {
       { method: 'PATCH', body: { number } },
     ),
 
+  deleteRaffle: (raffleId: string) =>
+    request<null>(`/raffles/${raffleId}`, { method: 'DELETE' }),
+
   changeStatus: (raffleId: string, status: RaffleStatus) =>
     request<Raffle>(`/raffles/${raffleId}/status`, { method: 'PATCH', body: { status } }),
 
