@@ -14,7 +14,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:int": "vitest run --config vitest.integration.config.ts",
-    "dev": "node --import @swc-node/register/esm-register --watch src/main.ts",
+    "dev": "node --import @swc-node/register/esm-register --watch-path=./src src/main.ts",
     "start": "node dist/main.js"
   },
   "dependencies": {
