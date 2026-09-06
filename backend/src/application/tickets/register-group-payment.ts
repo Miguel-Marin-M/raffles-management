@@ -59,7 +59,7 @@ export class RegisterGroupPayment {
       if (missing.length > 0) throw new TicketNumbersNotReservedError(missing);
 
       if (!Number.isSafeInteger(command.amountMinorUnits) || command.amountMinorUnits <= 0) {
-        throw new ValidationError('El abono tiene que ser mayor que cero');
+        throw new ValidationError('The instalment must be greater than zero');
       }
 
       const outstanding = tickets.reduce(

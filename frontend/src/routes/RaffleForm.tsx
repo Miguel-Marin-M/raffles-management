@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 
-import type { CreateRaffleInput, Raffle } from '../lib/rifas-api';
+import type { CreateRaffleInput, Raffle } from '../lib/raffles-api';
 
 interface RaffleFormProps {
   readonly busy: boolean;

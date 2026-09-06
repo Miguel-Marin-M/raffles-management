@@ -14,7 +14,7 @@ import {
   type CustomerInput,
   type RaffleBoard,
   type RaffleStatus,
-} from '../../lib/rifas-api';
+} from '../../lib/raffles-api';
 import { RaffleForm } from '../RaffleForm';
 import { TicketDetail } from '../TicketDetail';
 

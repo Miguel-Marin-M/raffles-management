@@ -6,7 +6,7 @@ import { CustomerPicker } from '../components/CustomerPicker';
 import { MergeCustomerDialog, type PhoneConflict } from '../components/MergeCustomerDialog';
 import { Sheet } from '../components/Sheet';
 import { formatMoney } from '../lib/format';
-import type { BoardCell, CustomerInput, Raffle } from '../lib/rifas-api';
+import type { BoardCell, CustomerInput, Raffle } from '../lib/raffles-api';
 
 interface CustomersPanelProps {
   readonly raffle: Raffle;

@@ -6,7 +6,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { CustomerPicker } from '../components/CustomerPicker';
 import { describeError } from '../lib/errors';
 import { formatMoney } from '../lib/format';
-import { api, type BoardCell, type CustomerInput } from '../lib/rifas-api';
+import { api, type BoardCell, type CustomerInput } from '../lib/raffles-api';
 
 interface TicketDetailProps {
   readonly cell: BoardCell;

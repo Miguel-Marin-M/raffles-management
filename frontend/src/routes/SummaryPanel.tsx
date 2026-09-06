@@ -4,7 +4,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { PrizeWinners } from '../components/PrizeWinners';
 import { downloadCsv } from '../lib/csv';
 import { formatDate, formatMoney } from '../lib/format';
-import type { RaffleBoard, RaffleStatus } from '../lib/rifas-api';
+import type { RaffleBoard, RaffleStatus } from '../lib/raffles-api';
 
 interface SummaryPanelProps {
   readonly board: RaffleBoard;

@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 
 import { describeError } from '../lib/errors';
-import { api } from '../lib/rifas-api';
+import { api } from '../lib/raffles-api';
 
 interface AddPhoneProps {
   readonly customerId: string;

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 
-import { api, type Customer, type CustomerInput } from '../lib/rifas-api';
+import { api, type Customer, type CustomerInput } from '../lib/raffles-api';
 
 interface CustomerPickerProps {
   readonly onChange: (customer: CustomerInput | null) => void;

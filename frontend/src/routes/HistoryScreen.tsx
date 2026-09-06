@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { describeError } from '../lib/errors';
 import { formatDate, formatMoney } from '../lib/format';
-import { api, type Raffle } from '../lib/rifas-api';
+import { api, type Raffle } from '../lib/raffles-api';
 
 /**
  * Raffles that have already been drawn.

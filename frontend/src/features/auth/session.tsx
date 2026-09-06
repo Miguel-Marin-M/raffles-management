@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { refreshSession } from '../../lib/api';
-import { api } from '../../lib/rifas-api';
+import { api } from '../../lib/raffles-api';
 import { SessionContext, type SessionUser } from './session-context';
 
 export function SessionProvider({ children }: { children: React.ReactNode }): React.JSX.Element {

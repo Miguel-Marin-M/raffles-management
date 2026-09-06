@@ -1,7 +1,7 @@
 import { createContext } from 'react';
 
 import type { PhoneConflict } from '../../components/MergeCustomerDialog';
-import type { BoardCell, CustomerInput, RaffleBoard, RaffleStatus } from '../../lib/rifas-api';
+import type { BoardCell, CustomerInput, RaffleBoard, RaffleStatus } from '../../lib/raffles-api';
 
 export interface BoardContextValue {
   readonly board: RaffleBoard;

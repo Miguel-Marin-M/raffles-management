@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 
 import { CustomerPicker } from '../components/CustomerPicker';
-import type { CustomerInput } from '../lib/rifas-api';
+import type { CustomerInput } from '../lib/raffles-api';
 
 interface ReserveFormProps {
   readonly raffleId: string;

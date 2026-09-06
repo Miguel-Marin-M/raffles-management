@@ -8,7 +8,7 @@ import { Sheet } from '../../components/Sheet';
 import { useBoard } from '../../features/board/use-board';
 import { ApiError } from '../../lib/api';
 import { formatMoney } from '../../lib/format';
-import { api, type CustomerInput } from '../../lib/rifas-api';
+import { api, type CustomerInput } from '../../lib/raffles-api';
 import { ReserveForm } from '../ReserveForm';
 
 /**

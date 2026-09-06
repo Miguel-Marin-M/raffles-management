@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Sheet } from '../components/Sheet';
 import { useSession } from '../features/auth/use-session';
 import { formatMoney } from '../lib/format';
-import { api, type Raffle } from '../lib/rifas-api';
+import { api, type Raffle } from '../lib/raffles-api';
 import { RaffleForm } from './RaffleForm';
 
 const STATUS_COPY: Record<Raffle['status'], string> = {

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import type { BoardCell, Raffle } from '../lib/rifas-api';
+import type { BoardCell, Raffle } from '../lib/raffles-api';
 import { NumberCell, type CellState } from './NumberCell';
 
 interface NumberGridProps {

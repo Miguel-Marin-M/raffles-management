@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
 import { formatDayMonth, formatMoney } from '../lib/format';
-import type { RaffleBoard } from '../lib/rifas-api';
+import type { RaffleBoard } from '../lib/raffles-api';
 
 interface PosterProps {
   readonly board: RaffleBoard;

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import type { BoardCell, Prize, Raffle } from '../lib/rifas-api';
+import type { BoardCell, Prize, Raffle } from '../lib/raffles-api';
 
 interface PrizeWinnersProps {
   readonly raffle: Raffle;
