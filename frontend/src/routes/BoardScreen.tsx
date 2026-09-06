@@ -5,8 +5,10 @@ import { NumberGrid } from '../components/NumberGrid';
 import { Sheet } from '../components/Sheet';
 import { ApiError } from '../lib/api';
 import { formatMoney } from '../lib/format';
-import { api, type BoardCell, type RaffleBoard } from '../lib/rifas-api';
+import { api, type BoardCell, type RaffleBoard, type RaffleStatus } from '../lib/rifas-api';
+import { CustomersPanel } from './CustomersPanel';
 import { ReserveForm } from './ReserveForm';
+import { SummaryPanel } from './SummaryPanel';
 import { TicketDetail } from './TicketDetail';
 
 interface BoardScreenProps {
@@ -14,12 +16,21 @@ interface BoardScreenProps {
   readonly onBack: () => void;
 }
 
+type Panel = 'tablero' | 'clientes' | 'resumen';
+
+const PANELS: readonly { id: Panel; label: string }[] = [
+  { id: 'tablero', label: 'Tablero' },
+  { id: 'clientes', label: 'Clientes' },
+  { id: 'resumen', label: 'Resumen' },
+];
+
 /**
  * The screen the organizer lives in: the whole board, what is selected right
  * now, and how much money the raffle has moved.
  */
 export function BoardScreen({ raffleId, onBack }: BoardScreenProps): React.JSX.Element {
   const queryClient = useQueryClient();
+  const [panel, setPanel] = useState<Panel>('tablero');
   const [selected, setSelected] = useState<ReadonlySet<number>>(new Set());
   const [reserving, setReserving] = useState(false);
   const [openCell, setOpenCell] = useState<BoardCell | null>(null);
@@ -74,6 +85,11 @@ export function BoardScreen({ raffleId, onBack }: BoardScreenProps): React.JSX.E
     },
   });
 
+  const changeStatus = useMutation({
+    mutationFn: (status: RaffleStatus) => api.changeStatus(raffleId, status),
+    onSuccess: reload,
+  });
+
   function toggle(value: number): void {
     const cell = takenByNumber.get(value);
     // Tapping a taken number opens it; only free numbers join a selection.
@@ -109,6 +125,24 @@ export function BoardScreen({ raffleId, onBack }: BoardScreenProps): React.JSX.E
 
       <BoardHeader board={board.data} />
 
+      <nav className="mb-5 flex border border-linea" aria-label="Secciones de la rifa">
+        {PANELS.map((option) => (
+          <button
+            key={option.id}
+            type="button"
+            aria-current={panel === option.id}
+            onClick={() => {
+              setPanel(option.id);
+            }}
+            className={`min-h-11 flex-1 font-display text-sm font-semibold ${
+              panel === option.id ? 'bg-tinta text-papel-alto' : 'text-tinta-suave'
+            }`}
+          >
+            {option.label}
+          </button>
+        ))}
+      </nav>
+
       {conflict !== null ? (
         <p role="alert" className="mb-4 border-l-2 border-sello pl-3 text-sm text-sello">
           {conflict.length === 1
@@ -120,14 +154,35 @@ export function BoardScreen({ raffleId, onBack }: BoardScreenProps): React.JSX.E
         </p>
       ) : null}
 
-      <NumberGrid
-        raffle={raffle}
-        takenCells={board.data.takenCells}
-        selected={selected}
-        onToggle={toggle}
-      />
+      {panel === 'tablero' ? (
+        <>
+          <NumberGrid
+            raffle={raffle}
+            takenCells={board.data.takenCells}
+            selected={selected}
+            onToggle={toggle}
+          />
+          <Legend />
+        </>
+      ) : null}
 
-      <Legend />
+      {panel === 'clientes' ? (
+        <CustomersPanel
+          raffle={raffle}
+          takenCells={board.data.takenCells}
+          onOpenCell={setOpenCell}
+        />
+      ) : null}
+
+      {panel === 'resumen' ? (
+        <SummaryPanel
+          board={board.data}
+          busy={changeStatus.isPending}
+          onChangeStatus={(status) => {
+            changeStatus.mutate(status);
+          }}
+        />
+      ) : null}
 
       {selected.size > 0 ? (
         <div className="fixed inset-x-0 bottom-0 border-t border-tinta bg-papel-alto px-4 py-3">
@@ -197,7 +252,10 @@ export function BoardScreen({ raffleId, onBack }: BoardScreenProps): React.JSX.E
             onRelease={() => {
               release.mutate([openCell.number]);
             }}
-            onPaid={() => void reload()}
+            onChanged={() => {
+              setOpenCell(null);
+              void reload();
+            }}
           />
         )}
       </Sheet>
@@ -222,6 +280,7 @@ function BoardHeader({ board }: { board: RaffleBoard }): React.JSX.Element {
       <p className="cifra mt-1 text-sm text-tinta-suave">
         {formatMoney(raffle.ticketPriceMinorUnits, raffle.currency)} la boleta
         {raffle.lotteryReference === null ? '' : ` · juega con ${raffle.lotteryReference}`}
+        {raffle.status === 'closed' ? ' · cerrada' : ''}
       </p>
 
       <div className="mt-4 h-2 w-full border border-linea bg-papel-alto" aria-hidden="true">
