@@ -1,19 +1,8 @@
-import { createContext, use, useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { refreshSession, type Session } from '../../lib/api';
+import { refreshSession } from '../../lib/api';
 import { api } from '../../lib/rifas-api';
-
-type SessionUser = Session['user'];
-
-interface SessionContextValue {
-  readonly user: SessionUser | null;
-  readonly status: 'checking' | 'ready';
-  login(email: string, password: string): Promise<void>;
-  register(name: string, email: string, password: string): Promise<void>;
-  logout(): Promise<void>;
-}
-
-const SessionContext = createContext<SessionContextValue | null>(null);
+import { SessionContext, type SessionUser } from './session-context';
 
 export function SessionProvider({ children }: { children: React.ReactNode }): React.JSX.Element {
   const [user, setUser] = useState<SessionUser | null>(null);
@@ -61,10 +50,4 @@ export function SessionProvider({ children }: { children: React.ReactNode }): Re
   );
 
   return <SessionContext value={value}>{children}</SessionContext>;
-}
-
-export function useSession(): SessionContextValue {
-  const value = use(SessionContext);
-  if (value === null) throw new Error('useSession must be used inside SessionProvider');
-  return value;
 }

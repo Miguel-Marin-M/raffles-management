@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
 import { Sheet } from '../components/Sheet';
-import { useSession } from '../features/auth/session';
+import { useSession } from '../features/auth/use-session';
 import { formatMoney } from '../lib/format';
 import { api, type Raffle } from '../lib/rifas-api';
 import { RaffleForm } from './RaffleForm';

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { useSession } from './features/auth/session';
+import { useSession } from './features/auth/use-session';
 import { AccessScreen } from './routes/AccessScreen';
 import { BoardScreen } from './routes/BoardScreen';
 import { RafflesScreen } from './routes/RafflesScreen';

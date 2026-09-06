@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 
+import { useSession } from '../features/auth/use-session';
 import { ApiError } from '../lib/api';
-import { useSession } from '../features/auth/session';
 
 /**
  * Entry screen. Sign in and sign up share one form because an organizer sets
