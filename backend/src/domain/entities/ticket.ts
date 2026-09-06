@@ -131,6 +131,21 @@ export class Ticket {
     }
   }
 
+  /**
+   * Takes credit back off this ticket.
+   *
+   * An instalment is money from the customer, not a claim on a particular
+   * number: when the organizer finally says which boletas play, whatever was
+   * sitting on the others moves to them and those go back to zero.
+   */
+  withdrawCredit(amount: Money): void {
+    if (this.isPaid()) throw new PaidTicketIsFinalError([this.number]);
+    if (amount.isGreaterThan(this.currentAmountPaid)) {
+      throw new ValidationError(`Ticket ${this.number} does not hold that much credit`);
+    }
+    this.currentAmountPaid = this.currentAmountPaid.subtract(amount);
+  }
+
   /** Settles whatever is left, which is how the board marks a ticket as paid. */
   settle(ticketPrice: Money, at: Date): Money {
     if (this.isPaid()) throw new TicketAlreadyPaidError(this.id);

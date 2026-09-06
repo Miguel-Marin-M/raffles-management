@@ -10,7 +10,7 @@ import { InMemoryDatabase } from '../../testing/in-memory/in-memory-database.js'
 import { InMemoryUnitOfWork } from '../../testing/in-memory/in-memory-unit-of-work.js';
 import { SequentialIdGenerator } from '../../testing/sequential-id-generator.js';
 import { MarkTicketsAsPaid } from './mark-tickets-as-paid.js';
-import { RegisterPayment } from './register-payment.js';
+import { RegisterGroupPayment } from './register-group-payment.js';
 
 const OWNER_ID = 'owner-1';
 const RAFFLE_ID = 'raffle-1';
@@ -19,7 +19,7 @@ describe('MarkTicketsAsPaid', () => {
   let db: InMemoryDatabase;
   let unitOfWork: InMemoryUnitOfWork;
   let clock: FixedClock;
-  let registerPayment: RegisterPayment;
+  let registerPayment: RegisterGroupPayment;
   let subject: MarkTicketsAsPaid;
 
   beforeEach(async () => {
@@ -29,7 +29,7 @@ describe('MarkTicketsAsPaid', () => {
     const idGenerator = new SequentialIdGenerator('payment');
 
     subject = new MarkTicketsAsPaid(unitOfWork, idGenerator, clock);
-    registerPayment = new RegisterPayment(unitOfWork, idGenerator, clock);
+    registerPayment = new RegisterGroupPayment(unitOfWork, idGenerator, clock);
 
     await unitOfWork.repositories.raffles.save(
       Raffle.create({
@@ -69,10 +69,52 @@ describe('MarkTicketsAsPaid', () => {
     expect(db.tickets.get('ticket-1')?.status).toBe('paid');
   });
 
+  it('moves the instalments of the other numbers onto the ones that play', async () => {
+    // 15.000 spread over 7, 13 and 42 leaves 5.000 on each.
+    await registerPayment.execute({
+      actorId: OWNER_ID,
+      raffleId: RAFFLE_ID,
+      numbers: [7, 13, 42],
+      amountMinorUnits: 15_000,
+    });
+
+    const result = await subject.execute({
+      actorId: OWNER_ID,
+      raffleId: RAFFLE_ID,
+      numbers: [7, 13],
+    });
+
+    expect(result.appliedCreditMinorUnits).toBe(5_000);
+    expect(result.collectedMinorUnits).toBe(5_000);
+    expect(db.tickets.get('ticket-1')?.status).toBe('paid');
+    expect(db.tickets.get('ticket-2')?.status).toBe('paid');
+    // The number left behind gives its instalment up.
+    expect(db.tickets.get('ticket-3')?.amountPaidMinorUnits).toBe(0);
+  });
+
+  it('leaves credit the settlement did not need where it was', async () => {
+    await registerPayment.execute({
+      actorId: OWNER_ID,
+      raffleId: RAFFLE_ID,
+      numbers: [7, 13, 42],
+      amountMinorUnits: 27_000,
+    });
+
+    await subject.execute({ actorId: OWNER_ID, raffleId: RAFFLE_ID, numbers: [7] });
+
+    // Settling 7 needed 1.000 of the 18.000 sitting on 13 and 42.
+    expect(db.tickets.get('ticket-1')?.status).toBe('paid');
+    expect(
+      (db.tickets.get('ticket-2')?.amountPaidMinorUnits ?? 0) +
+        (db.tickets.get('ticket-3')?.amountPaidMinorUnits ?? 0),
+    ).toBe(17_000);
+  });
+
   it('only charges the outstanding part of a partially paid ticket', async () => {
     await registerPayment.execute({
       actorId: OWNER_ID,
-      ticketId: 'ticket-1',
+      raffleId: RAFFLE_ID,
+      numbers: [7],
       amountMinorUnits: 4_000,
     });
 

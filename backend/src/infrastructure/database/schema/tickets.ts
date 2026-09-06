@@ -41,7 +41,11 @@ export const tickets = pgTable(
       .references(() => customers.id, { onDelete: 'restrict' }),
 
     status: ticketStatusEnum('status').notNull().default('reserved'),
-    /** Denormalized sum of `payments`, kept in sync within the same transaction. */
+    /**
+     * Credit currently sitting on this ticket. Usually the sum of its
+     * `payments`, except when an instalment is moved to the numbers the
+     * customer finally plays.
+     */
     amountPaidCents: bigint('amount_paid_cents', { mode: 'number' }).notNull().default(0),
     notes: text('notes'),
 
