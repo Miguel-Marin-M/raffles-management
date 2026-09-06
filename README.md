@@ -11,7 +11,7 @@ reserve tickets themselves.
 ```
 rifas/
 ├─ docker/             local infrastructure configuration
-├─ docker-compose.yml
+├─ docker-compose.yml  PostgreSQL and Adminer, development only
 ├─ backend/            @rifas/api  — REST API, domain, business rules and persistence
 └─ frontend/           @rifas/web  — mobile-first admin panel (React + Vite)
 ```
@@ -19,25 +19,20 @@ rifas/
 The schema and migrations live in `backend/src/infrastructure/database`, next to
 the code that owns them, so the API and its database ship as a single unit.
 
-The backend follows a hexagonal layering: `domain` holds entities, value objects
-and ports and depends on nothing; `application` holds one class per use case;
-`infrastructure` implements the ports with Drizzle, argon2 and the system clock;
-`presentation` exposes them over HTTP. `presentation/modules/core.module.ts` is
-the single composition root that decides which implementation backs each port.
-
 ## Getting started
 
-Requires Node 22+ and Docker.
+Requires Node 22+, [pnpm](https://pnpm.io) and Docker. Docker is only used in
+development, to run PostgreSQL and Adminer; production needs neither.
 
 ```bash
-cp .env.example .env                  # docker compose variables
-cp backend/.env.example backend/.env  # API configuration
-cp frontend/.env.example frontend/.env
-npm install
-npm run db:up        # start PostgreSQL and Adminer
-npm run db:migrate   # apply migrations
-npm run dev          # API on http://localhost:3000/api
-npm run dev:web      # panel on http://localhost:5173
+cp .env.example .env                    # docker compose variables
+cp backend/.env.example backend/.env    # API configuration
+cp frontend/.env.example frontend/.env  # where the panel finds the API
+pnpm install
+pnpm db:up           # start PostgreSQL and Adminer
+pnpm db:migrate      # apply migrations
+pnpm dev             # API on http://localhost:3000/api
+pnpm dev:web         # panel on http://localhost:5173
 ```
 
 Each package owns its `.env`; the root one only feeds docker compose.
@@ -45,25 +40,31 @@ PostgreSQL is published on port **5434** to avoid clashing with a host
 PostgreSQL install, Adminer is available at <http://localhost:8080> and the API
 documents itself at <http://localhost:3000/api/docs>.
 
-The panel is a PWA: `npm run build --workspace @rifas/web` emits a service
-worker that precaches the app shell so it opens without a connection. API
-requests are deliberately never cached — a board served from a stale cache
-would show numbers as free that somebody had already taken, which is the one
-mistake this system exists to prevent. The icons are drawn by
-`frontend/scripts/generate-icons.mjs`, so no image toolchain is needed to
-regenerate them.
+The panel is a PWA: `pnpm --filter @rifas/web build` emits a service worker that
+precaches the app shell so it opens without a connection. API requests are
+deliberately never cached — a board served from a stale cache would show numbers
+as free that somebody had already taken, which is the one mistake this system
+exists to prevent. The icons are drawn by `frontend/scripts/generate-icons.mjs`,
+so no image toolchain is needed to regenerate them.
 
 ## Tests
 
 ```bash
-npm test                                  # domain and use cases, no database needed
-npm run test:int --workspace @rifas/api   # requires the container to be running
+pnpm test        # domain and use cases, no database needed
+pnpm test:int    # requires the container to be running
 ```
 
 The integration suite exists for one reason: the `(raffle_id, number)` unique
 constraint is what makes double reservation impossible, and only a real
 PostgreSQL can prove that two concurrent reservations of the same number leave
 exactly one ticket behind.
+
+## Deployment
+
+The API is a plain Node process: `pnpm --filter @rifas/api build` and then
+`node dist/main.js`, with the migrations applied first through
+`node dist/infrastructure/database/migrate.js`. The panel compiles to static
+files under `frontend/dist` and needs no server of its own.
 
 ## Conventions
 
