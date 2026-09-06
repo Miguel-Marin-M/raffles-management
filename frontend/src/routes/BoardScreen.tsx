@@ -7,6 +7,7 @@ import { ApiError } from '../lib/api';
 import { formatMoney } from '../lib/format';
 import { api, type BoardCell, type RaffleBoard, type RaffleStatus } from '../lib/rifas-api';
 import { CustomersPanel } from './CustomersPanel';
+import { Poster } from './PosterPanel';
 import { ReserveForm } from './ReserveForm';
 import { SummaryPanel } from './SummaryPanel';
 import { TicketDetail } from './TicketDetail';
@@ -16,11 +17,12 @@ interface BoardScreenProps {
   readonly onBack: () => void;
 }
 
-type Panel = 'tablero' | 'clientes' | 'resumen';
+type Panel = 'tablero' | 'clientes' | 'afiche' | 'resumen';
 
 const PANELS: readonly { id: Panel; label: string }[] = [
   { id: 'tablero', label: 'Tablero' },
   { id: 'clientes', label: 'Clientes' },
+  { id: 'afiche', label: 'Afiche' },
   { id: 'resumen', label: 'Resumen' },
 ];
 
@@ -35,6 +37,7 @@ export function BoardScreen({ raffleId, onBack }: BoardScreenProps): React.JSX.E
   const [reserving, setReserving] = useState(false);
   const [openCell, setOpenCell] = useState<BoardCell | null>(null);
   const [conflict, setConflict] = useState<readonly number[] | null>(null);
+  const [posterFullscreen, setPosterFullscreen] = useState(false);
 
   const board = useQuery({
     queryKey: ['board', raffleId],
@@ -179,6 +182,27 @@ export function BoardScreen({ raffleId, onBack }: BoardScreenProps): React.JSX.E
         />
       ) : null}
 
+      {panel === 'afiche' ? (
+        <section className="flex flex-col gap-3">
+          <p className="text-sm text-tinta-suave">
+            Así ven la rifa tus clientes. Ábrelo en pantalla completa y tómale una captura para
+            mandarlo por WhatsApp.
+          </p>
+          <div className="border border-linea">
+            <Poster board={board.data} />
+          </div>
+          <button
+            type="button"
+            className="boton"
+            onClick={() => {
+              setPosterFullscreen(true);
+            }}
+          >
+            Ver en pantalla completa
+          </button>
+        </section>
+      ) : null}
+
       {panel === 'resumen' ? (
         <SummaryPanel
           board={board.data}
@@ -264,6 +288,24 @@ export function BoardScreen({ raffleId, onBack }: BoardScreenProps): React.JSX.E
           />
         )}
       </Sheet>
+
+      {posterFullscreen ? (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-papel">
+          {/* Kept out of the poster frame so it never lands in the screenshot. */}
+          <div className="flex justify-end px-4 py-2">
+            <button
+              type="button"
+              className="min-h-11 text-sm underline underline-offset-4"
+              onClick={() => {
+                setPosterFullscreen(false);
+              }}
+            >
+              Cerrar
+            </button>
+          </div>
+          <Poster board={board.data} />
+        </div>
+      ) : null}
 
       <p className="sr-only" aria-live="polite">
         {summary.freeNumbers} números libres de {summary.totalNumbers}.
