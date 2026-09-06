@@ -8,6 +8,14 @@ interface NumberCellProps {
   readonly onSelect: () => void;
 }
 
+const STATE_STYLE: Record<CellState, string> = {
+  free: 'border-rule bg-sheet text-ink',
+  reserved: 'border-stamp bg-stamp/12 text-stamp',
+  paid: 'border-rule bg-transparent text-ink-soft',
+};
+
+const SELECTED_STYLE = 'border-ink bg-ink-soft text-sheet';
+
 const STATE_LABEL: Record<CellState, string> = {
   free: 'libre',
   reserved: 'apartada',
@@ -46,10 +54,9 @@ export function NumberCell({
         'rounded-[2px] border transition-[background-color,border-color,transform] duration-150',
         'font-display text-[length:var(--cell-font-size)] font-semibold tabular-nums',
         'active:scale-[0.97]',
-        state === 'free' ? 'border-rule bg-sheet text-ink' : '',
-        state === 'reserved' ? 'border-stamp bg-stamp/12 text-stamp' : '',
-        state === 'paid' ? 'border-rule bg-transparent text-ink-soft' : '',
-        selected ? 'border-ink bg-ink text-sheet' : '',
+        // One branch only: emitting the state and the selection together lets
+        // whichever utility Tailwind wrote last win, which is not a choice.
+        selected ? SELECTED_STYLE : STATE_STYLE[state],
       ]
         .filter(Boolean)
         .join(' ')}
