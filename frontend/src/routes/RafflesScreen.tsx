@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 
 import { Sheet } from '../components/Sheet';
@@ -7,10 +8,6 @@ import { formatMoney } from '../lib/format';
 import { api, type Raffle } from '../lib/rifas-api';
 import { RaffleForm } from './RaffleForm';
 
-interface RafflesScreenProps {
-  readonly onOpen: (raffleId: string) => void;
-}
-
 const STATUS_COPY: Record<Raffle['status'], string> = {
   draft: 'borrador',
   active: 'en venta',
@@ -18,8 +15,9 @@ const STATUS_COPY: Record<Raffle['status'], string> = {
 };
 
 /** Home of the app: every raffle the organizer runs, newest first. */
-export function RafflesScreen({ onOpen }: RafflesScreenProps): React.JSX.Element {
+export function RafflesScreen(): React.JSX.Element {
   const { user, logout } = useSession();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [creating, setCreating] = useState(false);
 
@@ -30,7 +28,7 @@ export function RafflesScreen({ onOpen }: RafflesScreenProps): React.JSX.Element
     onSuccess: async (raffle) => {
       setCreating(false);
       await queryClient.invalidateQueries({ queryKey: ['raffles'] });
-      onOpen(raffle.id);
+      void navigate({ to: '/raffles/$raffleId/board', params: { raffleId: raffle.id } });
     },
   });
 
@@ -66,12 +64,10 @@ export function RafflesScreen({ onOpen }: RafflesScreenProps): React.JSX.Element
       <ul className="mt-6 flex flex-col gap-3">
         {raffles.data?.map((raffle) => (
           <li key={raffle.id}>
-            <button
-              type="button"
-              onClick={() => {
-                onOpen(raffle.id);
-              }}
-              className="w-full border border-linea bg-papel-alto px-4 py-4 text-left transition-colors hover:border-tinta"
+            <Link
+              to="/raffles/$raffleId/board"
+              params={{ raffleId: raffle.id }}
+              className="block w-full border border-linea bg-papel-alto px-4 py-4 text-left transition-colors hover:border-tinta"
             >
               <div className="flex items-baseline justify-between gap-3">
                 <h2 className="text-xl leading-tight">{raffle.name}</h2>
@@ -87,7 +83,7 @@ export function RafflesScreen({ onOpen }: RafflesScreenProps): React.JSX.Element
                   {raffle.prizes.map((prize) => prize.title).join(' · ')}
                 </p>
               ) : null}
-            </button>
+            </Link>
           </li>
         ))}
       </ul>
