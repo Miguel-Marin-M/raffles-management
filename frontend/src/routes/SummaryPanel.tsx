@@ -5,11 +5,17 @@ import type { RaffleBoard, RaffleStatus } from '../lib/rifas-api';
 interface SummaryPanelProps {
   readonly board: RaffleBoard;
   readonly onChangeStatus: (status: RaffleStatus) => void;
+  readonly onEdit: () => void;
   readonly busy: boolean;
 }
 
 /** Prizes, money and the paperwork: what the organizer reports to buyers. */
-export function SummaryPanel({ board, onChangeStatus, busy }: SummaryPanelProps): React.JSX.Element {
+export function SummaryPanel({
+  board,
+  onChangeStatus,
+  onEdit,
+  busy,
+}: SummaryPanelProps): React.JSX.Element {
   const { raffle, summary, takenCells } = board;
   const drawDate = formatDate(raffle.drawDate);
 
@@ -81,6 +87,10 @@ export function SummaryPanel({ board, onChangeStatus, busy }: SummaryPanelProps)
       </section>
 
       <div className="flex flex-col gap-2">
+        <button type="button" className="boton" onClick={onEdit}>
+          Editar rifa y premios
+        </button>
+
         <button type="button" className="boton boton-secundario" onClick={exportCsv}>
           Descargar boletas en CSV
         </button>

@@ -8,6 +8,7 @@ import { formatMoney } from '../lib/format';
 import { api, type BoardCell, type RaffleBoard, type RaffleStatus } from '../lib/rifas-api';
 import { CustomersPanel } from './CustomersPanel';
 import { Poster } from './PosterPanel';
+import { RaffleForm } from './RaffleForm';
 import { ReserveForm } from './ReserveForm';
 import { SummaryPanel } from './SummaryPanel';
 import { TicketDetail } from './TicketDetail';
@@ -38,6 +39,7 @@ export function BoardScreen({ raffleId, onBack }: BoardScreenProps): React.JSX.E
   const [openCell, setOpenCell] = useState<BoardCell | null>(null);
   const [conflict, setConflict] = useState<readonly number[] | null>(null);
   const [posterFullscreen, setPosterFullscreen] = useState(false);
+  const [editing, setEditing] = useState(false);
 
   const board = useQuery({
     queryKey: ['board', raffleId],
@@ -84,6 +86,16 @@ export function BoardScreen({ raffleId, onBack }: BoardScreenProps): React.JSX.E
     onSuccess: async () => {
       setSelected(new Set());
       setOpenCell(null);
+      await reload();
+    },
+  });
+
+  const updateRaffle = useMutation({
+    mutationFn: (input: Parameters<typeof api.updateRaffle>[1]) =>
+      api.updateRaffle(raffleId, input),
+    onSuccess: async () => {
+      setEditing(false);
+      await queryClient.invalidateQueries({ queryKey: ['raffles'] });
       await reload();
     },
   });
@@ -210,6 +222,9 @@ export function BoardScreen({ raffleId, onBack }: BoardScreenProps): React.JSX.E
           onChangeStatus={(status) => {
             changeStatus.mutate(status);
           }}
+          onEdit={() => {
+            setEditing(true);
+          }}
         />
       ) : null}
 
@@ -287,6 +302,23 @@ export function BoardScreen({ raffleId, onBack }: BoardScreenProps): React.JSX.E
             }}
           />
         )}
+      </Sheet>
+
+      <Sheet
+        open={editing}
+        title="Editar rifa"
+        onClose={() => {
+          setEditing(false);
+        }}
+      >
+        <RaffleForm
+          initial={raffle}
+          busy={updateRaffle.isPending}
+          error={updateRaffle.error}
+          onSubmit={(input) => {
+            updateRaffle.mutate(input);
+          }}
+        />
       </Sheet>
 
       {posterFullscreen ? (
