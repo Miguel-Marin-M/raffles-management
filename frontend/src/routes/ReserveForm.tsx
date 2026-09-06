@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 
+import { CustomerPicker } from '../components/CustomerPicker';
 import type { CustomerInput } from '../lib/rifas-api';
 
 interface ReserveFormProps {
@@ -18,12 +19,11 @@ export function ReserveForm({
   busy,
   onSubmit,
 }: ReserveFormProps): React.JSX.Element {
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
+  const [customer, setCustomer] = useState<CustomerInput | null>(null);
 
   function submit(event: FormEvent): void {
     event.preventDefault();
-    onSubmit({ name, phone: phone === '' ? null : phone });
+    if (customer !== null) onSubmit(customer);
   }
 
   return (
@@ -36,38 +36,9 @@ export function ReserveForm({
         <p className="cifra mt-1 text-sm text-tinta-suave">Total {total}</p>
       </div>
 
-      <label className="flex flex-col gap-1">
-        <span className="rotulo">Cliente</span>
-        <input
-          className="campo"
-          value={name}
-          onChange={(event) => {
-            setName(event.target.value);
-          }}
-          placeholder="Ana Torres"
-          required
-          autoFocus
-        />
-      </label>
+      <CustomerPicker onChange={setCustomer} autoFocus />
 
-      <label className="flex flex-col gap-1">
-        <span className="rotulo">Teléfono</span>
-        <input
-          className="campo cifra"
-          type="tel"
-          inputMode="tel"
-          value={phone}
-          onChange={(event) => {
-            setPhone(event.target.value);
-          }}
-          placeholder="300 111 2233"
-        />
-        <span className="text-xs text-tinta-suave">
-          Si ya le vendiste antes, con el mismo teléfono reusamos su ficha.
-        </span>
-      </label>
-
-      <button type="submit" className="boton" disabled={busy}>
+      <button type="submit" className="boton" disabled={busy || customer === null}>
         {busy ? 'Apartando…' : 'Apartar boletas'}
       </button>
     </form>
