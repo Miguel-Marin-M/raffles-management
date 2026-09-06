@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { AddPhone } from '../components/AddPhone';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { CustomerPicker } from '../components/CustomerPicker';
+import { MergeCustomerDialog, type PhoneConflict } from '../components/MergeCustomerDialog';
 import { Sheet } from '../components/Sheet';
 import { formatMoney } from '../lib/format';
 import type { BoardCell, CustomerInput, Raffle } from '../lib/rifas-api';
@@ -15,7 +16,11 @@ interface CustomersPanelProps {
   readonly onMarkAsPaid: (numbers: readonly number[]) => void;
   readonly onRelease: (numbers: readonly number[]) => void;
   readonly onReassign: (numbers: readonly number[], customer: CustomerInput) => void;
+  readonly onRegisterPayment: (numbers: readonly number[], amountMinorUnits: number) => void;
   readonly onCustomerChanged: () => void;
+  readonly phoneConflict: PhoneConflict | null;
+  readonly onResolveConflict: (conflict: PhoneConflict | null) => void;
+  readonly readOnly: boolean;
 }
 
 interface CustomerRow {
@@ -46,7 +51,11 @@ export function CustomersPanel({
   onMarkAsPaid,
   onRelease,
   onReassign,
+  onRegisterPayment,
   onCustomerChanged,
+  phoneConflict,
+  onResolveConflict,
+  readOnly,
 }: CustomersPanelProps): React.JSX.Element {
   // Only one customer is collected from at a time; picking numbers of another
   // one starts a new selection.
@@ -55,6 +64,8 @@ export function CustomersPanel({
   );
   const [confirming, setConfirming] = useState<'charge' | 'release' | null>(null);
   const [reassigning, setReassigning] = useState(false);
+  const [paying, setPaying] = useState(false);
+  const [amount, setAmount] = useState('');
   const [newCustomer, setNewCustomer] = useState<CustomerInput | null>(null);
 
   const rows = useMemo(() => {
@@ -95,6 +106,7 @@ export function CustomersPanel({
   const selectedLabels = selectedCells.map((cell) => cell.label).join(', ');
 
   function toggle(row: CustomerRow, cell: BoardCell): void {
+    if (readOnly) return;
     if (cell.status === 'paid') {
       onOpenCell(cell);
       return;
@@ -111,7 +123,12 @@ export function CustomersPanel({
   function clearSelection(): void {
     setSelection(null);
     setNewCustomer(null);
+    setAmount('');
   }
+
+  const share = selectedCells.length === 0 ? 0 : Math.floor(Number(amount) / selectedCells.length);
+  const amountIsValid =
+    Number.isFinite(Number(amount)) && Number(amount) > 0 && Number(amount) <= selectedTotal;
 
   if (rows.length === 0) {
     return (
@@ -127,7 +144,9 @@ export function CustomersPanel({
   return (
     <>
       <p className="mb-3 text-sm text-ink-soft">
-        Toca los números apartados para escoger sobre cuáles quieres actuar.
+        {readOnly
+          ? 'Esta rifa está cerrada. Así quedó el registro de quién compró cada número.'
+          : 'Toca los números apartados para escoger sobre cuáles quieres actuar.'}
       </p>
 
       <ul className="flex flex-col gap-3 pb-28">
@@ -173,7 +192,7 @@ export function CustomersPanel({
                   );
                 })}
 
-                {pending.length > 1 ? (
+                {pending.length > 1 && !readOnly ? (
                   <button
                     type="button"
                     className="min-h-9 px-2 text-xs underline underline-offset-4"
@@ -197,7 +216,9 @@ export function CustomersPanel({
                   </span>
                 </div>
                 {row.phone === null ? (
-                  <AddPhone customerId={row.id} onSaved={onCustomerChanged} />
+                  readOnly ? null : (
+                    <AddPhone customerId={row.id} onSaved={onCustomerChanged} />
+                  )
                 ) : (
                   <a className="numeric underline underline-offset-4" href={`tel:${row.phone}`}>
                     {row.phone}
@@ -248,6 +269,16 @@ export function CustomersPanel({
                 className="underline underline-offset-4"
                 disabled={busy}
                 onClick={() => {
+                  setPaying(true);
+                }}
+              >
+                Abonar
+              </button>
+              <button
+                type="button"
+                className="underline underline-offset-4"
+                disabled={busy}
+                onClick={() => {
                   setReassigning(true);
                 }}
               >
@@ -287,8 +318,8 @@ export function CustomersPanel({
           <span className="numeric">{selectedLabels}</span>.
         </p>
         <p className="mt-2 text-ink-soft">
-          Una vez pagadas, esas boletas no se pueden liberar ni pasar a otro cliente. Esto no se
-          puede deshacer.
+          Lo que este cliente haya abonado a sus otros números pasa a estas boletas, y esos
+          quedan en cero. Una vez pagadas no se pueden liberar ni pasar a otro cliente.
         </p>
       </ConfirmDialog>
 
@@ -325,6 +356,70 @@ export function CustomersPanel({
       </ConfirmDialog>
 
       <Sheet
+        open={paying}
+        title={`Abonar a ${selectedCells.length} ${
+          selectedCells.length === 1 ? 'boleta' : 'boletas'
+        }`}
+        onClose={() => {
+          setPaying(false);
+        }}
+      >
+        <div className="flex flex-col gap-4">
+          <div>
+            <p className="eyebrow">Números</p>
+            <p className="numeric mt-1 text-lg">{selectedLabels}</p>
+            <p className="numeric mt-1 text-sm text-ink-soft">
+              Deben {formatMoney(selectedTotal, raffle.currency)}
+            </p>
+          </div>
+
+          <label className="flex flex-col gap-1">
+            <span className="eyebrow">Abono</span>
+            <input
+              className="field numeric"
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={selectedTotal}
+              value={amount}
+              onChange={(event) => {
+                setAmount(event.target.value);
+              }}
+              placeholder={String(Math.round(selectedTotal / 2))}
+              autoFocus
+            />
+          </label>
+
+          {amount !== '' && !amountIsValid ? (
+            <p role="alert" className="text-sm text-stamp">
+              El abono no puede ser negativo ni pasar de{' '}
+              {formatMoney(selectedTotal, raffle.currency)}.
+            </p>
+          ) : null}
+
+          {amountIsValid ? (
+            <p className="text-sm text-ink-soft">
+              Se reparte por igual: unos {formatMoney(share, raffle.currency)} a cada boleta.
+              Ninguna queda pagada hasta que digas cuáles juegan.
+            </p>
+          ) : null}
+
+          <button
+            type="button"
+            className="btn"
+            disabled={!amountIsValid || busy}
+            onClick={() => {
+              setPaying(false);
+              onRegisterPayment(selectedNumbers, Number(amount));
+              clearSelection();
+            }}
+          >
+            Registrar abono
+          </button>
+        </div>
+      </Sheet>
+
+      <Sheet
         open={reassigning}
         title={`Pasar ${selectedCells.length} ${
           selectedCells.length === 1 ? 'boleta' : 'boletas'
@@ -342,7 +437,7 @@ export function CustomersPanel({
             </p>
           </div>
 
-          <CustomerPicker onChange={setNewCustomer} autoFocus />
+          <CustomerPicker onChange={setNewCustomer} raffleId={raffle.id} autoFocus />
 
           <button
             type="button"
@@ -359,6 +454,19 @@ export function CustomersPanel({
           </button>
         </div>
       </Sheet>
+
+      <MergeCustomerDialog
+        conflict={phoneConflict}
+        busy={busy}
+        onCancel={() => {
+          onResolveConflict(null);
+        }}
+        onConfirm={(pending) => {
+          onReassign(selectedNumbers, { id: pending.customerId, name: pending.typedName });
+          onResolveConflict(null);
+          clearSelection();
+        }}
+      />
     </>
   );
 }
