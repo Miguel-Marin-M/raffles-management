@@ -1,3 +1,6 @@
+import { useState } from 'react';
+
+import { ConfirmDialog } from '../components/ConfirmDialog';
 import { PrizeWinner } from '../components/PrizeWinner';
 import { downloadCsv } from '../lib/csv';
 import { formatDate, formatMoney } from '../lib/format';
@@ -19,6 +22,7 @@ export function SummaryPanel({
   onRecordWinner,
   busy,
 }: SummaryPanelProps): React.JSX.Element {
+  const [closing, setClosing] = useState(false);
   const { raffle, summary, takenCells } = board;
   const drawDate = formatDate(raffle.drawDate);
 
@@ -108,33 +112,57 @@ export function SummaryPanel({
         </button>
 
         {raffle.status === 'closed' ? (
-          <button
-            type="button"
-            className="btn btn-secondary"
-            disabled={busy}
-            onClick={() => {
-              onChangeStatus('active');
-            }}
-          >
-            Reabrir la rifa
-          </button>
+          <p className="border-l-2 border-ink pl-3 text-sm">
+            Esta rifa está cerrada y guardada en el historial. Su tablero queda como registro y
+            no se puede reabrir.
+          </p>
         ) : (
-          <button
-            type="button"
-            className="btn btn-secondary"
-            disabled={busy}
-            onClick={() => {
-              onChangeStatus('closed');
-            }}
-          >
-            Cerrar la rifa
-          </button>
+          <>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              disabled={busy}
+              onClick={() => {
+                setClosing(true);
+              }}
+            >
+              Cerrar la rifa
+            </button>
+            <p className="text-xs text-ink-soft">
+              Al cerrarla pasa al historial: el tablero queda como registro y ya no se pueden
+              apartar ni cobrar boletas.
+            </p>
+          </>
         )}
-        <p className="text-xs text-ink-soft">
-          Al cerrarla, el tablero queda como registro y ya no se pueden apartar ni cobrar
-          boletas.
-        </p>
       </div>
+
+      <ConfirmDialog
+        open={closing}
+        title={`Cerrar ${raffle.name}`}
+        confirmLabel="Sí, cerrarla"
+        busy={busy}
+        onCancel={() => {
+          setClosing(false);
+        }}
+        onConfirm={() => {
+          setClosing(false);
+          onChangeStatus('closed');
+        }}
+      >
+        <p>
+          La rifa pasa al historial y su tablero queda como registro: no se podrán apartar,
+          cobrar ni liberar más boletas.
+        </p>
+        {summary.reservedNumbers > 0 ? (
+          <p className="mt-2 text-stamp">
+            Quedan {summary.reservedNumbers} boletas apartadas sin pagar, por{' '}
+            {formatMoney(summary.pendingMinorUnits, raffle.currency)}.
+          </p>
+        ) : null}
+        <p className="mt-2 text-ink-soft">
+          Una rifa cerrada no se puede reabrir. Esto no se puede deshacer.
+        </p>
+      </ConfirmDialog>
     </div>
   );
 }
