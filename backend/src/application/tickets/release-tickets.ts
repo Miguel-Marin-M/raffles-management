@@ -1,5 +1,6 @@
 import { RaffleNotFoundError } from '../../domain/errors/raffle-errors.js';
 import {
+  PaidTicketIsFinalError,
   TicketHasPaymentsError,
   TicketNumbersNotReservedError,
 } from '../../domain/errors/ticket-errors.js';
@@ -40,6 +41,9 @@ export class ReleaseTickets {
       const found = new Set(tickets.map((ticket) => ticket.number));
       const missing = numbers.filter((number) => !found.has(number));
       if (missing.length > 0) throw new TicketNumbersNotReservedError(missing);
+
+      const paid = tickets.filter((ticket) => ticket.isPaid()).map((ticket) => ticket.number);
+      if (paid.length > 0) throw new PaidTicketIsFinalError(paid);
 
       // Money already collected has to be refunded and recorded deliberately,
       // so releasing such a ticket is refused instead of silently dropping it.

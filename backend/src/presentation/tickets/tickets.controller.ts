@@ -1,18 +1,9 @@
-import {
-  Body,
-  Controller,
-  HttpCode,
-  HttpStatus,
-  Param,
-  Patch,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { z } from 'zod';
 
 import { MarkTicketsAsPaid } from '../../application/tickets/mark-tickets-as-paid.js';
-import { ReassignTicket } from '../../application/tickets/reassign-ticket.js';
+import { ReassignTickets } from '../../application/tickets/reassign-tickets.js';
 import { RegisterPayment } from '../../application/tickets/register-payment.js';
 import { ReleaseTickets } from '../../application/tickets/release-tickets.js';
 import { ReserveTickets } from '../../application/tickets/reserve-tickets.js';
@@ -50,7 +41,7 @@ const releaseSchema = z.object({
   reason: z.string().nullish(),
 });
 
-const reassignSchema = z.object({ customer: customerSchema });
+const reassignSchema = z.object({ numbers: numbersSchema, customer: customerSchema });
 
 const paymentSchema = z.object({
   amountMinorUnits: z.number().int().positive(),
@@ -67,7 +58,7 @@ export class TicketsController {
     private readonly markTicketsAsPaid: MarkTicketsAsPaid,
     private readonly releaseTickets: ReleaseTickets,
     private readonly registerPayment: RegisterPayment,
-    private readonly reassignTicket: ReassignTicket,
+    private readonly reassignTickets: ReassignTickets,
   ) {}
 
   @Post('raffles/:raffleId/tickets/reserve')
@@ -119,16 +110,18 @@ export class TicketsController {
     });
   }
 
-  @Patch('tickets/:ticketId/customer')
-  @ApiOperation({ summary: 'Hand a reserved number over to another customer' })
+  @Post('raffles/:raffleId/tickets/reassign')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Hand reserved numbers over to another customer' })
   reassign(
     @CurrentUser() user: RequestUser,
-    @Param('ticketId') ticketId: string,
+    @Param('raffleId') raffleId: string,
     @Body(new ZodValidationPipe(reassignSchema)) body: z.infer<typeof reassignSchema>,
   ) {
-    return this.reassignTicket.execute({
+    return this.reassignTickets.execute({
       actorId: user.id,
-      ticketId,
+      raffleId,
+      numbers: body.numbers,
       customer: body.customer,
     });
   }

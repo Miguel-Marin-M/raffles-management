@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 
 import { CustomerResolver } from '../../application/customers/customer-resolver.js';
 import { MarkTicketsAsPaid } from '../../application/tickets/mark-tickets-as-paid.js';
-import { ReassignTicket } from '../../application/tickets/reassign-ticket.js';
+import { ReassignTickets } from '../../application/tickets/reassign-tickets.js';
 import { RegisterPayment } from '../../application/tickets/register-payment.js';
 import { ReleaseTickets } from '../../application/tickets/release-tickets.js';
 import { ReserveTickets } from '../../application/tickets/reserve-tickets.js';
@@ -45,9 +45,9 @@ import { TicketsController } from './tickets.controller.js';
       inject: [UNIT_OF_WORK, ID_GENERATOR, CLOCK],
     },
     {
-      provide: ReassignTicket,
+      provide: ReassignTickets,
       useFactory: (unitOfWork: UnitOfWork, customerResolver: CustomerResolver) =>
-        new ReassignTicket(unitOfWork, customerResolver),
+        new ReassignTickets(unitOfWork, customerResolver),
       inject: [UNIT_OF_WORK, CustomerResolver],
     },
     {

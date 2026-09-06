@@ -141,7 +141,7 @@ export class Ticket {
   }
 
   reassignTo(customerId: string): void {
-    if (this.isPaid()) throw new PaidTicketIsFinalError(this.id);
+    if (this.isPaid()) throw new PaidTicketIsFinalError([this.number]);
     if (customerId.trim() === '') throw new ValidationError('Customer is required');
     this.currentCustomerId = customerId;
   }
