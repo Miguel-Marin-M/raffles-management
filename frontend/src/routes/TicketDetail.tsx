@@ -1,9 +1,10 @@
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 
+import { CustomerPicker } from '../components/CustomerPicker';
 import { ApiError } from '../lib/api';
 import { formatMoney } from '../lib/format';
-import { api, type BoardCell } from '../lib/rifas-api';
+import { api, type BoardCell, type CustomerInput } from '../lib/rifas-api';
 
 interface TicketDetailProps {
   readonly cell: BoardCell;
@@ -12,7 +13,7 @@ interface TicketDetailProps {
   readonly busy: boolean;
   readonly onMarkAsPaid: () => void;
   readonly onRelease: () => void;
-  readonly onPaid: () => void;
+  readonly onChanged: () => void;
 }
 
 /** What one taken number owes, and the three things that can happen to it. */
@@ -23,17 +24,19 @@ export function TicketDetail({
   busy,
   onMarkAsPaid,
   onRelease,
-  onPaid,
+  onChanged,
 }: TicketDetailProps): React.JSX.Element {
   const [partial, setPartial] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [reassigning, setReassigning] = useState(false);
+  const [newCustomer, setNewCustomer] = useState<CustomerInput | null>(null);
 
   const registerPayment = useMutation({
     mutationFn: (amount: number) => api.registerPayment(cell.ticketId, amount),
     onSuccess: () => {
       setPartial('');
       setError(null);
-      onPaid();
+      onChanged();
     },
     onError: (cause: unknown) => {
       setError(
@@ -44,11 +47,27 @@ export function TicketDetail({
     },
   });
 
+  const reassign = useMutation({
+    mutationFn: (customer: CustomerInput) => api.reassign(cell.ticketId, customer),
+    onSuccess: onChanged,
+    onError: () => {
+      setError('No pudimos pasar la boleta a otro cliente.');
+    },
+  });
+
   return (
     <div className="flex flex-col gap-4">
       <div>
         <p className="rotulo">Cliente</p>
         <p className="text-lg">{cell.customerName}</p>
+        {cell.customerPhone === null ? null : (
+          <a
+            className="cifra text-sm underline underline-offset-4"
+            href={`tel:${cell.customerPhone}`}
+          >
+            {cell.customerPhone}
+          </a>
+        )}
       </div>
 
       <dl className="grid grid-cols-2 gap-3">
@@ -111,6 +130,43 @@ export function TicketDetail({
           {error}
         </p>
       ) : null}
+
+      {reassigning ? (
+        <div className="flex flex-col gap-3 border-t border-linea pt-4">
+          <CustomerPicker onChange={setNewCustomer} autoFocus />
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className="boton flex-1"
+              disabled={newCustomer === null || reassign.isPending}
+              onClick={() => {
+                if (newCustomer !== null) reassign.mutate(newCustomer);
+              }}
+            >
+              Pasar la boleta
+            </button>
+            <button
+              type="button"
+              className="boton boton-secundario"
+              onClick={() => {
+                setReassigning(false);
+              }}
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          className="self-start text-sm underline underline-offset-4"
+          onClick={() => {
+            setReassigning(true);
+          }}
+        >
+          Pasar la boleta a otro cliente
+        </button>
+      )}
 
       <button
         type="button"
