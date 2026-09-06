@@ -55,6 +55,19 @@
   button {
     font: inherit;
   }
+
+  /* Anything that reacts to a click says so under the pointer. */
+  button:not(:disabled),
+  a[href],
+  label:has(> input[type='checkbox']),
+  summary,
+  [role='button'] {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
 }
 
 @layer components {
