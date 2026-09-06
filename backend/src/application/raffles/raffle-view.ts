@@ -5,6 +5,7 @@ export interface PrizeView {
   readonly position: number;
   readonly title: string;
   readonly description: string | null;
+  readonly winningNumber: number | null;
 }
 
 export interface RaffleView {
@@ -49,6 +50,7 @@ export function toRaffleView(raffle: Raffle): RaffleView {
       position: prize.position,
       title: prize.title,
       description: prize.description,
+      winningNumber: prize.winningNumber,
     })),
     createdAt: raffle.createdAt.toISOString(),
   };
