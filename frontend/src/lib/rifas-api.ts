@@ -35,6 +35,7 @@ export interface BoardCell {
   readonly status: TicketStatus;
   readonly customerId: string;
   readonly customerName: string;
+  readonly customerPhone: string | null;
   readonly amountPaidMinorUnits: number;
   readonly outstandingMinorUnits: number;
   readonly notes: string | null;
@@ -74,6 +75,13 @@ export interface CreateRaffleInput {
   readonly status?: RaffleStatus;
 }
 
+export interface Customer {
+  readonly id: string;
+  readonly name: string;
+  readonly phone: string | null;
+  readonly notes: string | null;
+}
+
 export type CustomerInput =
   | { readonly id: string }
   | { readonly name: string; readonly phone?: string | null };
@@ -103,6 +111,9 @@ export const api = {
   },
 
   me: () => request<Session['user']>('/auth/me'),
+
+  searchCustomers: (term: string) =>
+    request<Customer[]>(`/customers?q=${encodeURIComponent(term)}`),
 
   listRaffles: () => request<Raffle[]>('/raffles'),
 
@@ -134,6 +145,12 @@ export const api = {
       method: 'POST',
       body: { numbers },
     }),
+
+  reassign: (ticketId: string, customer: CustomerInput) =>
+    request<{ ticketId: string; number: number; customerId: string }>(
+      `/tickets/${ticketId}/customer`,
+      { method: 'PATCH', body: { customer } },
+    ),
 
   registerPayment: (ticketId: string, amountMinorUnits: number, method?: PaymentMethod) =>
     request<{ ticketId: string; status: TicketStatus; outstandingMinorUnits: number }>(
