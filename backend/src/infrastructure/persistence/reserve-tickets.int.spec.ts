@@ -82,12 +82,16 @@ describe('ticket reservation against PostgreSQL', () => {
     await connection.db.delete(users).where(eq(users.id, ownerId));
   });
 
+  // Each customer needs their own phone: sharing one is a conflict on purpose.
+  let nextPhone = 3_000_000_000;
+
   function reserve(numbers: readonly number[], customerName: string) {
+    nextPhone += 1;
     return reserveTickets.execute({
       actorId: ownerId,
       raffleId,
       numbers,
-      customer: { name: customerName, phone: `300${Date.now() % 10_000_000}` },
+      customer: { name: customerName, phone: String(nextPhone) },
     });
   }
 

@@ -14,9 +14,12 @@ import { ZodValidationPipe } from '../pipes/zod-validation.pipe.js';
 const numbersSchema = z.array(z.number().int().min(0)).min(1);
 const paymentMethodSchema = z.enum(['cash', 'transfer', 'card', 'other']);
 
-/** Either an existing customer or the data to register one while reserving. */
+/**
+ * Either an existing customer or the data to register one while reserving.
+ * The optional name on the first branch renames them, which merges records.
+ */
 const customerSchema = z.union([
-  z.object({ id: z.uuid() }),
+  z.object({ id: z.uuid(), name: z.string().min(1).optional() }),
   z.object({
     name: z.string().min(1),
     phone: z.string().nullish(),
