@@ -6,6 +6,7 @@ import { ChangeRaffleStatus } from '../../application/raffles/change-raffle-stat
 import { CreateRaffle } from '../../application/raffles/create-raffle.js';
 import { GetRaffleBoard } from '../../application/raffles/get-raffle-board.js';
 import { ListRaffles } from '../../application/raffles/list-raffles.js';
+import { RecordPrizeWinner } from '../../application/raffles/record-prize-winner.js';
 import { UpdateRaffle } from '../../application/raffles/update-raffle.js';
 import { CurrentUser, type RequestUser } from '../auth/current-user.decorator.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
@@ -36,6 +37,8 @@ const updateRaffleSchema = createRaffleSchema
 
 const statusSchema = z.object({ status: z.enum(['draft', 'active', 'closed']) });
 
+const winnerSchema = z.object({ number: z.number().int().min(0).nullable() });
+
 @ApiTags('raffles')
 @Controller('raffles')
 @UseGuards(JwtAuthGuard)
@@ -46,6 +49,7 @@ export class RafflesController {
     private readonly updateRaffle: UpdateRaffle,
     private readonly changeRaffleStatus: ChangeRaffleStatus,
     private readonly getRaffleBoard: GetRaffleBoard,
+    private readonly recordPrizeWinner: RecordPrizeWinner,
   ) {}
 
   @Get()
@@ -87,6 +91,22 @@ export class RafflesController {
       actorId: user.id,
       raffleId,
       ...(drawDate === undefined ? {} : { drawDate: drawDate === null ? null : new Date(drawDate) }),
+    });
+  }
+
+  @Patch(':raffleId/prizes/:prizeId/winner')
+  @ApiOperation({ summary: 'Write down the number that won a prize' })
+  recordWinner(
+    @CurrentUser() user: RequestUser,
+    @Param('raffleId') raffleId: string,
+    @Param('prizeId') prizeId: string,
+    @Body(new ZodValidationPipe(winnerSchema)) body: z.infer<typeof winnerSchema>,
+  ) {
+    return this.recordPrizeWinner.execute({
+      actorId: user.id,
+      raffleId,
+      prizeId,
+      number: body.number,
     });
   }
 
