@@ -32,6 +32,10 @@ export function Poster({ board }: PosterProps): React.JSX.Element {
 
   const drawDate = formatDayMonth(raffle.drawDate);
 
+  function winnerName(number: number): string | null {
+    return takenCells.find((cell) => cell.number === number)?.customerName ?? null;
+  }
+
   return (
     <article className="mx-auto w-full max-w-[26rem] bg-papel-alto px-5 py-7">
       <h2
@@ -57,12 +61,26 @@ export function Poster({ board }: PosterProps): React.JSX.Element {
               className="flex items-baseline gap-3 border-t border-linea py-2 last:border-b last:border-linea"
             >
               <span className="cifra w-5 shrink-0 text-sm text-tinta-suave">{prize.position}</span>
-              <span
-                className="font-display text-lg font-semibold leading-tight"
-                style={{ fontStretch: '108%' }}
-              >
-                {prize.title}
-              </span>
+              <div className="flex flex-1 flex-col items-start">
+                <span
+                  className="font-display text-lg font-semibold leading-tight"
+                  style={{ fontStretch: '108%' }}
+                >
+                  {prize.title}
+                </span>
+                {prize.winningNumber === null ? null : (
+                  <span className="mt-1 text-sm">
+                    <span className="cifra bg-loteria px-1.5 py-0.5 font-semibold">
+                      Ganó el {String(prize.winningNumber).padStart(raffle.numberDigits, '0')}
+                    </span>
+                    {winnerName(prize.winningNumber) === null ? null : (
+                      <span className="ml-2 text-tinta-suave">
+                        {winnerName(prize.winningNumber)}
+                      </span>
+                    )}
+                  </span>
+                )}
+              </div>
             </li>
           ))}
         </ol>
