@@ -2,7 +2,7 @@ import { and, eq, ilike, inArray, or } from 'drizzle-orm';
 
 import { Customer } from '../../domain/entities/customer.js';
 import type { CustomerRepository } from '../../domain/ports/customer-repository.js';
-import { customers } from '../database/schema/index.js';
+import { customers, tickets } from '../database/schema/index.js';
 import type { CustomerRow } from '../database/schema/index.js';
 import type { DrizzleExecutor } from './drizzle-executor.js';
 
@@ -54,6 +54,29 @@ export class DrizzleCustomerRepository implements CustomerRepository {
       limit,
     });
     return rows.map((row) => toCustomer(row));
+  }
+
+  async searchInRaffle(
+    ownerId: string,
+    raffleId: string,
+    term: string,
+    limit: number,
+  ): Promise<Customer[]> {
+    const pattern = `%${term.trim()}%`;
+    const rows = await this.db
+      .selectDistinct({ customer: customers })
+      .from(customers)
+      .innerJoin(tickets, eq(tickets.customerId, customers.id))
+      .where(
+        and(
+          eq(customers.ownerId, ownerId),
+          eq(tickets.raffleId, raffleId),
+          or(ilike(customers.name, pattern), ilike(customers.phone, pattern)),
+        ),
+      )
+      .limit(limit);
+
+    return rows.map((row) => toCustomer(row.customer));
   }
 
   async save(customer: Customer): Promise<void> {

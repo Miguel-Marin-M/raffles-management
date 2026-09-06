@@ -26,8 +26,17 @@ export class CustomersController {
   @Get()
   @ApiOperation({ summary: 'Look up customers by name or phone' })
   @ApiQuery({ name: 'q', required: false })
-  search(@CurrentUser() user: RequestUser, @Query('q') term?: string) {
-    return this.searchCustomers.execute({ actorId: user.id, term: term ?? '' });
+  @ApiQuery({ name: 'raffleId', required: false })
+  search(
+    @CurrentUser() user: RequestUser,
+    @Query('q') term?: string,
+    @Query('raffleId') raffleId?: string,
+  ) {
+    return this.searchCustomers.execute({
+      actorId: user.id,
+      term: term ?? '',
+      ...(raffleId === undefined ? {} : { raffleId }),
+    });
   }
 
   @Patch(':customerId')

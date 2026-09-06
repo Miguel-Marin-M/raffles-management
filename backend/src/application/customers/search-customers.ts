@@ -17,12 +17,18 @@ export class SearchCustomers {
     actorId: string;
     term: string;
     limit?: number;
+    /** Restricts the results to buyers of this raffle. */
+    raffleId?: string;
   }): Promise<CustomerView[]> {
     const term = input.term.trim();
     if (term === '') return [];
 
     const limit = Math.min(input.limit ?? DEFAULT_LIMIT, MAX_LIMIT);
-    const customers = await this.customers.search(input.actorId, term, limit);
+    const customers =
+      input.raffleId === undefined
+        ? await this.customers.search(input.actorId, term, limit)
+        : await this.customers.searchInRaffle(input.actorId, input.raffleId, term, limit);
+
     return customers.map((customer) => toCustomerView(customer));
   }
 }

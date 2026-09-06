@@ -77,6 +77,22 @@ export class InMemoryCustomerRepository implements CustomerRepository {
       .map((customer) => Customer.restore(customer));
   }
 
+  async searchInRaffle(
+    ownerId: string,
+    raffleId: string,
+    term: string,
+    limit: number,
+  ): Promise<Customer[]> {
+    const inRaffle = new Set(
+      [...this.db.tickets.values()]
+        .filter((ticket) => ticket.raffleId === raffleId)
+        .map((ticket) => ticket.customerId),
+    );
+
+    const matches = await this.search(ownerId, term, limit);
+    return matches.filter((customer) => inRaffle.has(customer.id));
+  }
+
   async save(customer: Customer): Promise<void> {
     this.db.customers.set(customer.id, customer.toSnapshot());
   }
