@@ -2,8 +2,10 @@ import { useMemo, useState } from 'react';
 
 import { AddPhone } from '../components/AddPhone';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { CustomerPicker } from '../components/CustomerPicker';
+import { Sheet } from '../components/Sheet';
 import { formatMoney } from '../lib/format';
-import type { BoardCell, Raffle } from '../lib/rifas-api';
+import type { BoardCell, CustomerInput, Raffle } from '../lib/rifas-api';
 
 interface CustomersPanelProps {
   readonly raffle: Raffle;
@@ -11,6 +13,8 @@ interface CustomersPanelProps {
   readonly busy: boolean;
   readonly onOpenCell: (cell: BoardCell) => void;
   readonly onMarkAsPaid: (numbers: readonly number[]) => void;
+  readonly onRelease: (numbers: readonly number[]) => void;
+  readonly onReassign: (numbers: readonly number[], customer: CustomerInput) => void;
   readonly onCustomerChanged: () => void;
 }
 
@@ -30,9 +34,9 @@ interface CustomerRow {
  * extra request. Debtors come first, because that is the list the organizer
  * works through.
  *
- * Numbers are charged one by one or in groups: somebody who reserved five
- * boletas often pays for three today and the rest next week, so the pending
- * ones can be picked individually before charging them together.
+ * Numbers are picked one by one — somebody who reserved five boletas often
+ * pays for three today — and that one selection feeds the three things that
+ * can happen to them: charging, releasing, or handing them to another person.
  */
 export function CustomersPanel({
   raffle,
@@ -40,6 +44,8 @@ export function CustomersPanel({
   busy,
   onOpenCell,
   onMarkAsPaid,
+  onRelease,
+  onReassign,
   onCustomerChanged,
 }: CustomersPanelProps): React.JSX.Element {
   // Only one customer is collected from at a time; picking numbers of another
@@ -47,7 +53,9 @@ export function CustomersPanel({
   const [selection, setSelection] = useState<{ customerId: string; numbers: number[] } | null>(
     null,
   );
-  const [confirming, setConfirming] = useState(false);
+  const [confirming, setConfirming] = useState<'charge' | 'release' | null>(null);
+  const [reassigning, setReassigning] = useState(false);
+  const [newCustomer, setNewCustomer] = useState<CustomerInput | null>(null);
 
   const rows = useMemo(() => {
     const grouped = new Map<string, CustomerRow>();
@@ -83,6 +91,8 @@ export function CustomersPanel({
     (total, cell) => total + cell.outstandingMinorUnits,
     0,
   );
+  const selectedWithPayments = selectedCells.filter((cell) => cell.amountPaidMinorUnits > 0);
+  const selectedLabels = selectedCells.map((cell) => cell.label).join(', ');
 
   function toggle(row: CustomerRow, cell: BoardCell): void {
     if (cell.status === 'paid') {
@@ -96,6 +106,11 @@ export function CustomersPanel({
       : [...current, cell.number].sort((a, b) => a - b);
 
     setSelection(next.length === 0 ? null : { customerId: row.id, numbers: next });
+  }
+
+  function clearSelection(): void {
+    setSelection(null);
+    setNewCustomer(null);
   }
 
   if (rows.length === 0) {
@@ -112,10 +127,10 @@ export function CustomersPanel({
   return (
     <>
       <p className="mb-3 text-sm text-ink-soft">
-        Toca los números apartados para escoger cuáles te está pagando ahora.
+        Toca los números apartados para escoger sobre cuáles quieres actuar.
       </p>
 
-      <ul className="flex flex-col gap-3 pb-24">
+      <ul className="flex flex-col gap-3 pb-28">
         {rows.map((row) => {
           const pending = row.cells.filter((cell) => cell.status !== 'paid');
           const isActive = selection?.customerId === row.id;
@@ -175,7 +190,7 @@ export function CustomersPanel({
               </div>
 
               <div className="mt-2 text-xs text-ink-soft">
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-2">
+                <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
                   <span className="numeric">
                     {row.cells.length} {row.cells.length === 1 ? 'boleta' : 'boletas'} · abonado{' '}
                     {formatMoney(row.paid, raffle.currency)}
@@ -196,66 +211,154 @@ export function CustomersPanel({
 
       {activeRow !== null && selectedCells.length > 0 ? (
         <div className="fixed inset-x-0 bottom-0 border-t border-ink bg-sheet px-4 py-3">
-          <div className="mx-auto flex max-w-2xl items-center gap-3">
-            <div className="min-w-0 flex-1">
-              <p className="numeric truncate text-sm">
+          <div className="mx-auto flex max-w-2xl flex-col gap-2">
+            <div className="flex items-center gap-3">
+              <p className="numeric min-w-0 flex-1 truncate text-sm">
                 {activeRow.name} · {selectedCells.length}{' '}
                 {selectedCells.length === 1 ? 'boleta' : 'boletas'} ·{' '}
                 {formatMoney(selectedTotal, raffle.currency)}
               </p>
               <button
                 type="button"
-                className="text-xs text-ink-soft underline underline-offset-4"
+                className="btn"
+                disabled={busy}
                 onClick={() => {
-                  setSelection(null);
+                  setConfirming('charge');
                 }}
+              >
+                Cobrar
+              </button>
+            </div>
+
+            {/* Releasing and handing over are kept quiet: the daily action is
+                collecting, and these two are hard to undo. */}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+              <button
+                type="button"
+                className="text-stamp underline underline-offset-4"
+                disabled={busy}
+                onClick={() => {
+                  setConfirming('release');
+                }}
+              >
+                Liberar
+              </button>
+              <button
+                type="button"
+                className="underline underline-offset-4"
+                disabled={busy}
+                onClick={() => {
+                  setReassigning(true);
+                }}
+              >
+                Pasar a otro cliente
+              </button>
+              <button
+                type="button"
+                className="text-ink-soft underline underline-offset-4"
+                onClick={clearSelection}
               >
                 Quitar selección
               </button>
             </div>
-            <button
-              type="button"
-              className="btn"
-              disabled={busy}
-              onClick={() => {
-                setConfirming(true);
-              }}
-            >
-              Cobrar
-            </button>
           </div>
         </div>
       ) : null}
 
       <ConfirmDialog
-        open={confirming}
+        open={confirming === 'charge'}
         title={`Cobrar ${selectedCells.length} ${
           selectedCells.length === 1 ? 'boleta' : 'boletas'
         }`}
         confirmLabel="Sí, ya pagó"
         busy={busy}
         onCancel={() => {
-          setConfirming(false);
+          setConfirming(null);
         }}
         onConfirm={() => {
-          setConfirming(false);
+          setConfirming(null);
           onMarkAsPaid(selectedNumbers);
-          setSelection(null);
+          clearSelection();
         }}
       >
         <p>
           Vas a registrar {formatMoney(selectedTotal, raffle.currency)} de{' '}
           {activeRow?.name ?? 'este cliente'} por{' '}
-          <span className="numeric">
-            {selectedCells.map((cell) => cell.label).join(', ')}
-          </span>
-          .
+          <span className="numeric">{selectedLabels}</span>.
         </p>
         <p className="mt-2 text-ink-soft">
           Una vez pagadas, esas boletas no se pueden liberar ni pasar a otro cliente. Esto no se
           puede deshacer.
         </p>
       </ConfirmDialog>
+
+      <ConfirmDialog
+        open={confirming === 'release'}
+        title={`Liberar ${selectedCells.length} ${
+          selectedCells.length === 1 ? 'boleta' : 'boletas'
+        }`}
+        confirmLabel="Sí, liberar"
+        busy={busy}
+        onCancel={() => {
+          setConfirming(null);
+        }}
+        onConfirm={() => {
+          setConfirming(null);
+          onRelease(selectedNumbers);
+          clearSelection();
+        }}
+      >
+        <p>
+          <span className="numeric">{selectedLabels}</span> vuelven a quedar libres y{' '}
+          {activeRow?.name ?? 'el cliente'} deja de tenerlas.
+        </p>
+        {selectedWithPayments.length > 0 ? (
+          <p className="mt-2 text-stamp">
+            Ojo:{' '}
+            <span className="numeric">
+              {selectedWithPayments.map((cell) => cell.label).join(', ')}
+            </span>{' '}
+            ya tienen abonos. Devuélvele el dinero antes de liberarlas.
+          </p>
+        ) : null}
+        <p className="mt-2 text-ink-soft">Esto no se puede deshacer.</p>
+      </ConfirmDialog>
+
+      <Sheet
+        open={reassigning}
+        title={`Pasar ${selectedCells.length} ${
+          selectedCells.length === 1 ? 'boleta' : 'boletas'
+        }`}
+        onClose={() => {
+          setReassigning(false);
+        }}
+      >
+        <div className="flex flex-col gap-4">
+          <div>
+            <p className="eyebrow">Números</p>
+            <p className="numeric mt-1 text-lg">{selectedLabels}</p>
+            <p className="mt-1 text-sm text-ink-soft">
+              Hoy son de {activeRow?.name ?? 'este cliente'}. Lo abonado se va con las boletas.
+            </p>
+          </div>
+
+          <CustomerPicker onChange={setNewCustomer} autoFocus />
+
+          <button
+            type="button"
+            className="btn"
+            disabled={newCustomer === null || busy}
+            onClick={() => {
+              if (newCustomer === null) return;
+              setReassigning(false);
+              onReassign(selectedNumbers, newCustomer);
+              clearSelection();
+            }}
+          >
+            Pasar las boletas
+          </button>
+        </div>
+      </Sheet>
     </>
   );
 }
