@@ -1,11 +1,13 @@
-import { formatDate, formatMoney } from '../lib/format';
+import { PrizeWinner } from '../components/PrizeWinner';
 import { downloadCsv } from '../lib/csv';
+import { formatDate, formatMoney } from '../lib/format';
 import type { RaffleBoard, RaffleStatus } from '../lib/rifas-api';
 
 interface SummaryPanelProps {
   readonly board: RaffleBoard;
   readonly onChangeStatus: (status: RaffleStatus) => void;
   readonly onEdit: () => void;
+  readonly onRecordWinner: (prizeId: string, number: number | null) => void;
   readonly busy: boolean;
 }
 
@@ -14,6 +16,7 @@ export function SummaryPanel({
   board,
   onChangeStatus,
   onEdit,
+  onRecordWinner,
   busy,
 }: SummaryPanelProps): React.JSX.Element {
   const { raffle, summary, takenCells } = board;
@@ -50,7 +53,16 @@ export function SummaryPanel({
                 className="flex items-baseline gap-3 border-b border-linea py-2 last:border-b-0"
               >
                 <span className="cifra w-6 shrink-0 text-sm text-loteria">{prize.position}</span>
-                <span className="flex-1">{prize.title}</span>
+                <div className="flex flex-1 flex-col items-start">
+                  <span>{prize.title}</span>
+                  <PrizeWinner
+                    raffle={raffle}
+                    prize={prize}
+                    takenCells={takenCells}
+                    busy={busy}
+                    onRecord={onRecordWinner}
+                  />
+                </div>
               </li>
             ))}
           </ol>

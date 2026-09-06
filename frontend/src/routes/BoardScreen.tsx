@@ -100,6 +100,12 @@ export function BoardScreen({ raffleId, onBack }: BoardScreenProps): React.JSX.E
     },
   });
 
+  const recordWinner = useMutation({
+    mutationFn: ({ prizeId, number }: { prizeId: string; number: number | null }) =>
+      api.recordWinner(raffleId, prizeId, number),
+    onSuccess: reload,
+  });
+
   const changeStatus = useMutation({
     mutationFn: (status: RaffleStatus) => api.changeStatus(raffleId, status),
     onSuccess: reload,
@@ -218,12 +224,15 @@ export function BoardScreen({ raffleId, onBack }: BoardScreenProps): React.JSX.E
       {panel === 'resumen' ? (
         <SummaryPanel
           board={board.data}
-          busy={changeStatus.isPending}
+          busy={changeStatus.isPending || recordWinner.isPending}
           onChangeStatus={(status) => {
             changeStatus.mutate(status);
           }}
           onEdit={() => {
             setEditing(true);
+          }}
+          onRecordWinner={(prizeId, number) => {
+            recordWinner.mutate({ prizeId, number });
           }}
         />
       ) : null}
