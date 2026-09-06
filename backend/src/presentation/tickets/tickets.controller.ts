@@ -4,7 +4,7 @@ import { z } from 'zod';
 
 import { MarkTicketsAsPaid } from '../../application/tickets/mark-tickets-as-paid.js';
 import { ReassignTickets } from '../../application/tickets/reassign-tickets.js';
-import { RegisterPayment } from '../../application/tickets/register-payment.js';
+import { RegisterGroupPayment } from '../../application/tickets/register-group-payment.js';
 import { ReleaseTickets } from '../../application/tickets/release-tickets.js';
 import { ReserveTickets } from '../../application/tickets/reserve-tickets.js';
 import { CurrentUser, type RequestUser } from '../auth/current-user.decorator.js';
@@ -44,6 +44,7 @@ const releaseSchema = z.object({
 const reassignSchema = z.object({ numbers: numbersSchema, customer: customerSchema });
 
 const paymentSchema = z.object({
+  numbers: numbersSchema,
   amountMinorUnits: z.number().int().positive(),
   method: paymentMethodSchema.optional(),
   note: z.string().nullish(),
@@ -57,7 +58,7 @@ export class TicketsController {
     private readonly reserveTickets: ReserveTickets,
     private readonly markTicketsAsPaid: MarkTicketsAsPaid,
     private readonly releaseTickets: ReleaseTickets,
-    private readonly registerPayment: RegisterPayment,
+    private readonly registerPayment: RegisterGroupPayment,
     private readonly reassignTickets: ReassignTickets,
   ) {}
 
@@ -126,16 +127,17 @@ export class TicketsController {
     });
   }
 
-  @Post('tickets/:ticketId/payments')
-  @ApiOperation({ summary: 'Record a payment or instalment on one ticket' })
+  @Post('raffles/:raffleId/tickets/payments')
+  @ApiOperation({ summary: 'Record an instalment split across the chosen numbers' })
   pay(
     @CurrentUser() user: RequestUser,
-    @Param('ticketId') ticketId: string,
+    @Param('raffleId') raffleId: string,
     @Body(new ZodValidationPipe(paymentSchema)) body: z.infer<typeof paymentSchema>,
   ) {
     return this.registerPayment.execute({
       actorId: user.id,
-      ticketId,
+      raffleId,
+      numbers: body.numbers,
       amountMinorUnits: body.amountMinorUnits,
       ...(body.method === undefined ? {} : { method: body.method }),
       note: body.note ?? null,

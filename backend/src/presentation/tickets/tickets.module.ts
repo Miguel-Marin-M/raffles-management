@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common';
 import { CustomerResolver } from '../../application/customers/customer-resolver.js';
 import { MarkTicketsAsPaid } from '../../application/tickets/mark-tickets-as-paid.js';
 import { ReassignTickets } from '../../application/tickets/reassign-tickets.js';
-import { RegisterPayment } from '../../application/tickets/register-payment.js';
+import { RegisterGroupPayment } from '../../application/tickets/register-group-payment.js';
 import { ReleaseTickets } from '../../application/tickets/release-tickets.js';
 import { ReserveTickets } from '../../application/tickets/reserve-tickets.js';
 import { CLOCK, type Clock } from '../../domain/ports/clock.js';
@@ -39,9 +39,9 @@ import { TicketsController } from './tickets.controller.js';
       inject: [UNIT_OF_WORK, ID_GENERATOR, CLOCK],
     },
     {
-      provide: RegisterPayment,
+      provide: RegisterGroupPayment,
       useFactory: (unitOfWork: UnitOfWork, idGenerator: IdGenerator, clock: Clock) =>
-        new RegisterPayment(unitOfWork, idGenerator, clock),
+        new RegisterGroupPayment(unitOfWork, idGenerator, clock),
       inject: [UNIT_OF_WORK, ID_GENERATOR, CLOCK],
     },
     {

@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { Raffle } from '../../domain/entities/raffle.js';
-import { CustomerNotFoundError } from '../../domain/errors/customer-errors.js';
+import {
+  CustomerNotFoundError,
+  DuplicateCustomerPhoneError,
+} from '../../domain/errors/customer-errors.js';
 import { RaffleClosedError, RaffleNotFoundError } from '../../domain/errors/raffle-errors.js';
 import {
   EmptyTicketSelectionError,
@@ -52,12 +55,17 @@ describe('ReserveTickets', () => {
     );
   });
 
+  const PHONES: Record<string, string> = {
+    'Ana Torres': '3001112233',
+    'Otro cliente': '3009998877',
+  };
+
   function reserve(numbers: readonly number[], customerName = 'Ana Torres') {
     return reserveTickets.execute({
       actorId: OWNER_ID,
       raffleId: RAFFLE_ID,
       numbers,
-      customer: { name: customerName, phone: '3001112233' },
+      customer: { name: customerName, phone: PHONES[customerName] ?? '3005550000' },
     });
   }
 
@@ -76,10 +84,40 @@ describe('ReserveTickets', () => {
     expect(db.ticketEvents.map((event) => event.number)).toEqual([1, 2]);
   });
 
-  it('registers a new customer once and reuses it by phone', async () => {
+  it('registers the customer once and keeps using it', async () => {
     await reserve([1]);
     await reserve([2]);
 
+    expect(db.customers.size).toBe(1);
+  });
+
+  it('refuses a phone that already belongs to somebody else', async () => {
+    await reserve([1], 'Ana Torres');
+
+    await expect(
+      reserveTickets.execute({
+        actorId: OWNER_ID,
+        raffleId: RAFFLE_ID,
+        numbers: [2],
+        customer: { name: 'Ana María', phone: '3001112233' },
+      }),
+    ).rejects.toThrow(DuplicateCustomerPhoneError);
+    expect(db.customers.size).toBe(1);
+    expect(db.takenNumbers(RAFFLE_ID)).toEqual(new Set([1]));
+  });
+
+  it('merges both records under the new name when told to', async () => {
+    const first = await reserve([1], 'Ana Torres');
+
+    const merged = await reserveTickets.execute({
+      actorId: OWNER_ID,
+      raffleId: RAFFLE_ID,
+      numbers: [2],
+      customer: { id: first.customerId, name: 'Ana María Torres' },
+    });
+
+    expect(merged.customerId).toBe(first.customerId);
+    expect(db.customers.get(first.customerId)?.name).toBe('Ana María Torres');
     expect(db.customers.size).toBe(1);
   });
 

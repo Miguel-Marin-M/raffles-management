@@ -57,3 +57,12 @@ export class RaffleNotClosedError extends DomainError {
     super(`Raffle ${raffleId} must be closed before it can be deleted`);
   }
 }
+
+/** Closing needs the draw to be written down first. */
+export class MissingPrizeWinnersError extends DomainError {
+  readonly code = 'MISSING_PRIZE_WINNERS';
+
+  constructor(readonly positions: readonly number[]) {
+    super(`Prizes without a winning number: ${positions.join(', ')}`);
+  }
+}

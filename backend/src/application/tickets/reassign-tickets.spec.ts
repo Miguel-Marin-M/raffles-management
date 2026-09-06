@@ -14,7 +14,7 @@ import { InMemoryUnitOfWork } from '../../testing/in-memory/in-memory-unit-of-wo
 import { SequentialIdGenerator } from '../../testing/sequential-id-generator.js';
 import { CustomerResolver } from '../customers/customer-resolver.js';
 import { ReassignTickets } from './reassign-tickets.js';
-import { RegisterPayment } from './register-payment.js';
+import { RegisterGroupPayment } from './register-group-payment.js';
 
 const OWNER_ID = 'owner-1';
 const RAFFLE_ID = 'raffle-1';
@@ -23,7 +23,7 @@ describe('ReassignTickets', () => {
   let db: InMemoryDatabase;
   let unitOfWork: InMemoryUnitOfWork;
   let reassignTickets: ReassignTickets;
-  let registerPayment: RegisterPayment;
+  let registerPayment: RegisterGroupPayment;
 
   beforeEach(async () => {
     db = new InMemoryDatabase();
@@ -32,7 +32,7 @@ describe('ReassignTickets', () => {
     const idGenerator = new SequentialIdGenerator();
 
     reassignTickets = new ReassignTickets(unitOfWork, new CustomerResolver(idGenerator, clock));
-    registerPayment = new RegisterPayment(unitOfWork, idGenerator, clock);
+    registerPayment = new RegisterGroupPayment(unitOfWork, idGenerator, clock);
 
     await unitOfWork.repositories.raffles.save(
       Raffle.create({
@@ -81,7 +81,8 @@ describe('ReassignTickets', () => {
   it('keeps what the previous customer had already paid', async () => {
     await registerPayment.execute({
       actorId: OWNER_ID,
-      ticketId: 'ticket-1',
+      raffleId: RAFFLE_ID,
+      numbers: [7],
       amountMinorUnits: 4_000,
     });
 
@@ -102,7 +103,8 @@ describe('ReassignTickets', () => {
   it('refuses a selection containing a paid number and moves nothing', async () => {
     await registerPayment.execute({
       actorId: OWNER_ID,
-      ticketId: 'ticket-1',
+      raffleId: RAFFLE_ID,
+      numbers: [7],
       amountMinorUnits: 10_000,
     });
 

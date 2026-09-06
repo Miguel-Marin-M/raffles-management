@@ -1,6 +1,7 @@
 import { ValidationError } from '../errors/domain-error.js';
 import {
   ClosedRaffleIsFinalError,
+  MissingPrizeWinnersError,
   PrizeListError,
   RaffleAccessDeniedError,
   RaffleClosedError,
@@ -250,7 +251,20 @@ export class Raffle {
     if (this.currentStatus === 'closed' && status !== 'closed') {
       throw new ClosedRaffleIsFinalError(this.id);
     }
+    if (status === 'closed') this.ensureWinnersAreRecorded();
     this.currentStatus = status;
+  }
+
+  /**
+   * A raffle closes once it has been drawn, so every prize must already name
+   * its number: closing first and filling the winners later would leave the
+   * record incomplete with no way back.
+   */
+  ensureWinnersAreRecorded(): void {
+    const pending = this.currentPrizes.filter((prize) => prize.winningNumber === null);
+    if (pending.length > 0) {
+      throw new MissingPrizeWinnersError(pending.map((prize) => prize.position));
+    }
   }
 
   /** Deleting is only offered from the history, so the raffle has to be there. */

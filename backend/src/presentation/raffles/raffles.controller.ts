@@ -18,7 +18,7 @@ import { CreateRaffle } from '../../application/raffles/create-raffle.js';
 import { DeleteRaffle } from '../../application/raffles/delete-raffle.js';
 import { GetRaffleBoard } from '../../application/raffles/get-raffle-board.js';
 import { ListRaffles } from '../../application/raffles/list-raffles.js';
-import { RecordPrizeWinner } from '../../application/raffles/record-prize-winner.js';
+import { RecordPrizeWinners } from '../../application/raffles/record-prize-winners.js';
 import { UpdateRaffle } from '../../application/raffles/update-raffle.js';
 import { CurrentUser, type RequestUser } from '../auth/current-user.decorator.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
@@ -49,7 +49,11 @@ const updateRaffleSchema = createRaffleSchema
 
 const statusSchema = z.object({ status: z.enum(['draft', 'active', 'closed']) });
 
-const winnerSchema = z.object({ number: z.number().int().min(0).nullable() });
+const winnersSchema = z.object({
+  winners: z
+    .array(z.object({ prizeId: z.uuid(), number: z.number().int().min(0).nullable() }))
+    .min(1),
+});
 
 @ApiTags('raffles')
 @Controller('raffles')
@@ -61,7 +65,7 @@ export class RafflesController {
     private readonly updateRaffle: UpdateRaffle,
     private readonly changeRaffleStatus: ChangeRaffleStatus,
     private readonly getRaffleBoard: GetRaffleBoard,
-    private readonly recordPrizeWinner: RecordPrizeWinner,
+    private readonly recordPrizeWinners: RecordPrizeWinners,
     private readonly deleteRaffle: DeleteRaffle,
   ) {}
 
@@ -107,19 +111,17 @@ export class RafflesController {
     });
   }
 
-  @Patch(':raffleId/prizes/:prizeId/winner')
-  @ApiOperation({ summary: 'Write down the number that won a prize' })
-  recordWinner(
+  @Patch(':raffleId/prizes/winners')
+  @ApiOperation({ summary: 'Write down the numbers that won after the draw' })
+  recordWinners(
     @CurrentUser() user: RequestUser,
     @Param('raffleId') raffleId: string,
-    @Param('prizeId') prizeId: string,
-    @Body(new ZodValidationPipe(winnerSchema)) body: z.infer<typeof winnerSchema>,
+    @Body(new ZodValidationPipe(winnersSchema)) body: z.infer<typeof winnersSchema>,
   ) {
-    return this.recordPrizeWinner.execute({
+    return this.recordPrizeWinners.execute({
       actorId: user.id,
       raffleId,
-      prizeId,
-      number: body.number,
+      winners: body.winners,
     });
   }
 

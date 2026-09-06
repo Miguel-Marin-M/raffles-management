@@ -10,21 +10,21 @@ import { NumberRange } from '../../domain/value-objects/number-range.js';
 import { InMemoryDatabase } from '../../testing/in-memory/in-memory-database.js';
 import { InMemoryUnitOfWork } from '../../testing/in-memory/in-memory-unit-of-work.js';
 import { SequentialIdGenerator } from '../../testing/sequential-id-generator.js';
-import { RecordPrizeWinner } from './record-prize-winner.js';
+import { RecordPrizeWinners } from './record-prize-winners.js';
 import { UpdateRaffle } from './update-raffle.js';
 
 const OWNER_ID = 'owner-1';
 const RAFFLE_ID = 'raffle-1';
 const CREATED_AT = new Date('2026-03-09T10:00:00Z');
 
-describe('RecordPrizeWinner', () => {
+describe('RecordPrizeWinners', () => {
   let unitOfWork: InMemoryUnitOfWork;
-  let recordWinner: RecordPrizeWinner;
+  let recordWinner: RecordPrizeWinners;
   let updateRaffle: UpdateRaffle;
 
   beforeEach(async () => {
     unitOfWork = new InMemoryUnitOfWork(new InMemoryDatabase());
-    recordWinner = new RecordPrizeWinner(
+    recordWinner = new RecordPrizeWinners(
       unitOfWork.repositories.raffles,
       unitOfWork.repositories.tickets,
     );
@@ -54,8 +54,7 @@ describe('RecordPrizeWinner', () => {
     const result = await recordWinner.execute({
       actorId: OWNER_ID,
       raffleId: RAFFLE_ID,
-      prizeId: 'prize-1',
-      number: 47,
+      winners: [{ prizeId: 'prize-1', number: 47 }],
     });
 
     expect(result.raffle.prizes[0]?.winningNumber).toBe(47);
@@ -77,37 +76,33 @@ describe('RecordPrizeWinner', () => {
     const result = await recordWinner.execute({
       actorId: OWNER_ID,
       raffleId: RAFFLE_ID,
-      prizeId: 'prize-1',
-      number: 47,
+      winners: [{ prizeId: 'prize-1', number: 47 }],
     });
 
-    expect(result.winnerCustomerId).toBe('customer-1');
+    expect(result.winnerCustomerIds['prize-1']).toBe('customer-1');
   });
 
   it('accepts a number nobody bought', async () => {
     const result = await recordWinner.execute({
       actorId: OWNER_ID,
       raffleId: RAFFLE_ID,
-      prizeId: 'prize-1',
-      number: 47,
+      winners: [{ prizeId: 'prize-1', number: 47 }],
     });
 
-    expect(result.winnerCustomerId).toBeNull();
+    expect(result.winnerCustomerIds['prize-1']).toBeNull();
   });
 
   it('clears a number recorded by mistake', async () => {
     await recordWinner.execute({
       actorId: OWNER_ID,
       raffleId: RAFFLE_ID,
-      prizeId: 'prize-1',
-      number: 47,
+      winners: [{ prizeId: 'prize-1', number: 47 }],
     });
 
     const result = await recordWinner.execute({
       actorId: OWNER_ID,
       raffleId: RAFFLE_ID,
-      prizeId: 'prize-1',
-      number: null,
+      winners: [{ prizeId: 'prize-1', number: null }],
     });
 
     expect(result.raffle.prizes[0]?.winningNumber).toBeNull();
@@ -118,8 +113,7 @@ describe('RecordPrizeWinner', () => {
       recordWinner.execute({
         actorId: OWNER_ID,
         raffleId: RAFFLE_ID,
-        prizeId: 'prize-1',
-        number: 250,
+        winners: [{ prizeId: 'prize-1', number: 250 }],
       }),
     ).rejects.toThrow(TicketNumbersOutOfRangeError);
   });
@@ -129,8 +123,7 @@ describe('RecordPrizeWinner', () => {
       recordWinner.execute({
         actorId: OWNER_ID,
         raffleId: RAFFLE_ID,
-        prizeId: 'prize-ajeno',
-        number: 12,
+        winners: [{ prizeId: 'prize-ajeno', number: 12 }],
       }),
     ).rejects.toThrow(PrizeListError);
   });
@@ -139,8 +132,7 @@ describe('RecordPrizeWinner', () => {
     await recordWinner.execute({
       actorId: OWNER_ID,
       raffleId: RAFFLE_ID,
-      prizeId: 'prize-1',
-      number: 47,
+      winners: [{ prizeId: 'prize-1', number: 47 }],
     });
 
     const updated = await updateRaffle.execute({

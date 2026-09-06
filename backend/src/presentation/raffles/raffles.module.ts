@@ -5,7 +5,7 @@ import { CreateRaffle } from '../../application/raffles/create-raffle.js';
 import { DeleteRaffle } from '../../application/raffles/delete-raffle.js';
 import { GetRaffleBoard } from '../../application/raffles/get-raffle-board.js';
 import { ListRaffles } from '../../application/raffles/list-raffles.js';
-import { RecordPrizeWinner } from '../../application/raffles/record-prize-winner.js';
+import { RecordPrizeWinners } from '../../application/raffles/record-prize-winners.js';
 import { UpdateRaffle } from '../../application/raffles/update-raffle.js';
 import { CLOCK, type Clock } from '../../domain/ports/clock.js';
 import {
@@ -50,9 +50,9 @@ import { RafflesController } from './raffles.controller.js';
       inject: [RAFFLE_REPOSITORY],
     },
     {
-      provide: RecordPrizeWinner,
+      provide: RecordPrizeWinners,
       useFactory: (raffles: RaffleRepository, tickets: TicketRepository) =>
-        new RecordPrizeWinner(raffles, tickets),
+        new RecordPrizeWinners(raffles, tickets),
       inject: [RAFFLE_REPOSITORY, TICKET_REPOSITORY],
     },
     {

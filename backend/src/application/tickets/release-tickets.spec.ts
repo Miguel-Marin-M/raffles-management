@@ -12,7 +12,7 @@ import { FixedClock } from '../../testing/fixed-clock.js';
 import { InMemoryDatabase } from '../../testing/in-memory/in-memory-database.js';
 import { InMemoryUnitOfWork } from '../../testing/in-memory/in-memory-unit-of-work.js';
 import { SequentialIdGenerator } from '../../testing/sequential-id-generator.js';
-import { RegisterPayment } from './register-payment.js';
+import { RegisterGroupPayment } from './register-group-payment.js';
 import { ReleaseTickets } from './release-tickets.js';
 
 const OWNER_ID = 'owner-1';
@@ -22,7 +22,7 @@ describe('ReleaseTickets', () => {
   let db: InMemoryDatabase;
   let unitOfWork: InMemoryUnitOfWork;
   let clock: FixedClock;
-  let registerPayment: RegisterPayment;
+  let registerPayment: RegisterGroupPayment;
   let subject: ReleaseTickets;
 
   beforeEach(async () => {
@@ -32,7 +32,7 @@ describe('ReleaseTickets', () => {
     const idGenerator = new SequentialIdGenerator('payment');
 
     subject = new ReleaseTickets(unitOfWork);
-    registerPayment = new RegisterPayment(unitOfWork, idGenerator, clock);
+    registerPayment = new RegisterGroupPayment(unitOfWork, idGenerator, clock);
 
     await unitOfWork.repositories.raffles.save(
       Raffle.create({
@@ -75,7 +75,8 @@ describe('ReleaseTickets', () => {
   it('refuses to release a ticket that already collected money', async () => {
     await registerPayment.execute({
       actorId: OWNER_ID,
-      ticketId: 'ticket-2',
+      raffleId: RAFFLE_ID,
+      numbers: [13],
       amountMinorUnits: 5_000,
     });
 

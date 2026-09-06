@@ -10,7 +10,7 @@ import { InMemoryUnitOfWork } from '../../testing/in-memory/in-memory-unit-of-wo
 import { SequentialIdGenerator } from '../../testing/sequential-id-generator.js';
 import { CustomerResolver } from '../customers/customer-resolver.js';
 import { MarkTicketsAsPaid } from '../tickets/mark-tickets-as-paid.js';
-import { RegisterPayment } from '../tickets/register-payment.js';
+import { RegisterGroupPayment } from '../tickets/register-group-payment.js';
 import { ReserveTickets } from '../tickets/reserve-tickets.js';
 import { GetRaffleBoard } from './get-raffle-board.js';
 
@@ -22,7 +22,7 @@ describe('GetRaffleBoard', () => {
   let getBoard: GetRaffleBoard;
   let reserveTickets: ReserveTickets;
   let markAsPaid: MarkTicketsAsPaid;
-  let registerPayment: RegisterPayment;
+  let registerPayment: RegisterGroupPayment;
 
   beforeEach(async () => {
     unitOfWork = new InMemoryUnitOfWork(new InMemoryDatabase());
@@ -36,7 +36,7 @@ describe('GetRaffleBoard', () => {
       clock,
     );
     markAsPaid = new MarkTicketsAsPaid(unitOfWork, idGenerator, clock);
-    registerPayment = new RegisterPayment(unitOfWork, idGenerator, clock);
+    registerPayment = new RegisterGroupPayment(unitOfWork, idGenerator, clock);
     getBoard = new GetRaffleBoard(
       unitOfWork.repositories.raffles,
       unitOfWork.repositories.tickets,
@@ -99,12 +99,11 @@ describe('GetRaffleBoard', () => {
 
   it('counts a partial payment as collected and still pending', async () => {
     const reserved = await reserve([7], 'Ana Torres');
-    const board = await getBoard.execute({ actorId: OWNER_ID, raffleId: RAFFLE_ID });
-    const ticketId = board.takenCells[0]?.ticketId ?? '';
 
     await registerPayment.execute({
       actorId: OWNER_ID,
-      ticketId,
+      raffleId: RAFFLE_ID,
+      numbers: [7],
       amountMinorUnits: 4_000,
     });
     const updated = await getBoard.execute({ actorId: OWNER_ID, raffleId: RAFFLE_ID });
