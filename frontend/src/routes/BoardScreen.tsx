@@ -170,7 +170,12 @@ export function BoardScreen({ raffleId, onBack }: BoardScreenProps): React.JSX.E
         <CustomersPanel
           raffle={raffle}
           takenCells={board.data.takenCells}
+          busy={markAsPaid.isPending}
           onOpenCell={setOpenCell}
+          onMarkAsPaid={(numbers) => {
+            markAsPaid.mutate(numbers);
+          }}
+          onCustomerChanged={() => void reload()}
         />
       ) : null}
 
