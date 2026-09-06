@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 
 import { SearchCustomers } from '../../application/customers/search-customers.js';
+import { UpdateCustomer } from '../../application/customers/update-customer.js';
 import {
   CUSTOMER_REPOSITORY,
   type CustomerRepository,
@@ -12,6 +13,11 @@ import { CustomersController } from './customers.controller.js';
   imports: [AuthModule],
   controllers: [CustomersController],
   providers: [
+    {
+      provide: UpdateCustomer,
+      useFactory: (customers: CustomerRepository) => new UpdateCustomer(customers),
+      inject: [CUSTOMER_REPOSITORY],
+    },
     {
       provide: SearchCustomers,
       useFactory: (customers: CustomerRepository) => new SearchCustomers(customers),
