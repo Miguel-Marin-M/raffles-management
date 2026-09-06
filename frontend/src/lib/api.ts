@@ -3,7 +3,11 @@ const API_URL = import.meta.env['VITE_API_URL'] ?? 'http://localhost:3000/api';
 export interface ApiErrorBody {
   readonly code: string;
   readonly message: string;
+  /** Numbers a board or a selection should highlight. */
   readonly numbers?: readonly number[];
+  /** Customer a duplicate phone already belongs to. */
+  readonly customerId?: string;
+  readonly customerName?: string;
   readonly details?: readonly { path: string; message: string }[];
 }
 

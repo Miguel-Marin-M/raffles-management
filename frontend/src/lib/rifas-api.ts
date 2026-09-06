@@ -85,7 +85,8 @@ export interface Customer {
 }
 
 export type CustomerInput =
-  | { readonly id: string }
+  /** Somebody already on file; `name` renames them, which merges both records. */
+  | { readonly id: string; readonly name?: string }
   | { readonly name: string; readonly phone?: string | null };
 
 export const api = {
@@ -114,8 +115,12 @@ export const api = {
 
   me: () => request<Session['user']>('/auth/me'),
 
-  searchCustomers: (term: string) =>
-    request<Customer[]>(`/customers?q=${encodeURIComponent(term)}`),
+  searchCustomers: (term: string, raffleId?: string) =>
+    request<Customer[]>(
+      `/customers?q=${encodeURIComponent(term)}${
+        raffleId === undefined ? '' : `&raffleId=${raffleId}`
+      }`,
+    ),
 
   updateCustomer: (
     customerId: string,
@@ -130,10 +135,13 @@ export const api = {
   updateRaffle: (raffleId: string, input: Partial<CreateRaffleInput>) =>
     request<Raffle>(`/raffles/${raffleId}`, { method: 'PATCH', body: input }),
 
-  recordWinner: (raffleId: string, prizeId: string, number: number | null) =>
-    request<{ raffle: Raffle; winnerCustomerId: string | null }>(
-      `/raffles/${raffleId}/prizes/${prizeId}/winner`,
-      { method: 'PATCH', body: { number } },
+  recordWinners: (
+    raffleId: string,
+    winners: readonly { prizeId: string; number: number | null }[],
+  ) =>
+    request<{ raffle: Raffle; winnerCustomerIds: Record<string, string | null> }>(
+      `/raffles/${raffleId}/prizes/winners`,
+      { method: 'PATCH', body: { winners } },
     ),
 
   deleteRaffle: (raffleId: string) =>
@@ -151,7 +159,11 @@ export const api = {
     ),
 
   markAsPaid: (raffleId: string, numbers: readonly number[], method?: PaymentMethod) =>
-    request<{ paidNumbers: number[]; collectedMinorUnits: number }>(
+    request<{
+      paidNumbers: number[];
+      collectedMinorUnits: number;
+      appliedCreditMinorUnits: number;
+    }>(
       `/raffles/${raffleId}/tickets/paid`,
       { method: 'POST', body: { numbers, method } },
     ),
@@ -168,9 +180,18 @@ export const api = {
       { method: 'POST', body: { numbers, customer } },
     ),
 
-  registerPayment: (ticketId: string, amountMinorUnits: number, method?: PaymentMethod) =>
-    request<{ ticketId: string; status: TicketStatus; outstandingMinorUnits: number }>(
-      `/tickets/${ticketId}/payments`,
-      { method: 'POST', body: { amountMinorUnits, method } },
-    ),
+  registerPayment: (
+    raffleId: string,
+    numbers: readonly number[],
+    amountMinorUnits: number,
+    method?: PaymentMethod,
+  ) =>
+    request<{
+      appliedMinorUnits: number;
+      paidNumbers: number[];
+      outstandingMinorUnits: number;
+    }>(`/raffles/${raffleId}/tickets/payments`, {
+      method: 'POST',
+      body: { numbers, amountMinorUnits, method },
+    }),
 };

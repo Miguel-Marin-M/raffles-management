@@ -15,6 +15,7 @@ const MESSAGES: Record<string, string> = {
   RAFFLE_CLOSED: 'La rifa está cerrada: su tablero ya no se puede modificar.',
   CLOSED_RAFFLE_IS_FINAL: 'Una rifa cerrada no se puede reabrir.',
   RAFFLE_NOT_CLOSED: 'Solo puedes borrar rifas que ya estén en el historial.',
+  MISSING_PRIZE_WINNERS: 'Antes de cerrar, anota el número ganador de cada premio.',
   INVALID_PRIZE_LIST: 'Revisa la lista de premios.',
   CUSTOMER_NOT_FOUND: 'No encontramos ese cliente.',
   DUPLICATE_CUSTOMER_PHONE: 'Ese teléfono ya está en la ficha de otro cliente.',
