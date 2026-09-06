@@ -27,6 +27,9 @@ export function createDatabaseConnection(
     ssl: config.ssl ? 'require' : false,
     // Transaction-mode poolers reject prepared statements.
     prepare: !config.ssl,
+    // Server notices ("relation already exists, skipping") are bookkeeping,
+    // not application events, and printing them makes migrations look broken.
+    onnotice: () => {},
   });
 
   const db = drizzle(sql, { schema, casing: 'snake_case' });
