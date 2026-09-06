@@ -174,11 +174,13 @@ export function CustomersPanel({
                 ) : null}
               </div>
 
-              <div className="mt-2 flex flex-wrap items-center gap-x-2 text-xs text-tinta-suave">
-                <span className="cifra">
-                  {row.cells.length} {row.cells.length === 1 ? 'boleta' : 'boletas'} · abonado{' '}
-                  {formatMoney(row.paid, raffle.currency)}
-                </span>
+              <div className="mt-2 text-xs text-tinta-suave">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-2">
+                  <span className="cifra">
+                    {row.cells.length} {row.cells.length === 1 ? 'boleta' : 'boletas'} · abonado{' '}
+                    {formatMoney(row.paid, raffle.currency)}
+                  </span>
+                </div>
                 {row.phone === null ? (
                   <AddPhone customerId={row.id} onSaved={onCustomerChanged} />
                 ) : (
