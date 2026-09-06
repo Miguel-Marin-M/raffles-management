@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 
-import { ApiError } from '../lib/api';
+import { describeError } from '../lib/errors';
 import { api } from '../lib/rifas-api';
 
 interface AddPhoneProps {
@@ -29,11 +29,7 @@ export function AddPhone({ customerId, onSaved }: AddPhoneProps): React.JSX.Elem
       onSaved();
     },
     onError: (cause: unknown) => {
-      setError(
-        cause instanceof ApiError && cause.body.code === 'DUPLICATE_CUSTOMER_PHONE'
-          ? 'Ese teléfono ya está en la ficha de otro cliente.'
-          : 'Ese teléfono no es válido.',
-      );
+      setError(describeError(cause));
     },
   });
 

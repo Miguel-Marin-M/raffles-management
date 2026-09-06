@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 
 import { useSession } from '../features/auth/use-session';
-import { ApiError } from '../lib/api';
+import { describeError } from '../lib/errors';
 
 /**
  * Entry screen. Sign in and sign up share one form because an organizer sets
@@ -25,7 +25,7 @@ export function AccessScreen(): React.JSX.Element {
       if (mode === 'login') await login(email, password);
       else await register(name, email, password);
     } catch (cause) {
-      setError(messageFor(cause));
+      setError(describeError(cause));
     } finally {
       setBusy(false);
     }
@@ -111,19 +111,4 @@ export function AccessScreen(): React.JSX.Element {
       </button>
     </main>
   );
-}
-
-function messageFor(cause: unknown): string {
-  if (!(cause instanceof ApiError)) return 'No pudimos conectar con el servidor.';
-
-  switch (cause.body.code) {
-    case 'INVALID_CREDENTIALS':
-      return 'El correo o la contraseña no coinciden.';
-    case 'EMAIL_ALREADY_REGISTERED':
-      return 'Ese correo ya tiene cuenta. Entra con tu contraseña.';
-    case 'VALIDATION_ERROR':
-      return 'Revisa los datos: la contraseña necesita al menos 8 caracteres.';
-    default:
-      return cause.body.message;
-  }
 }

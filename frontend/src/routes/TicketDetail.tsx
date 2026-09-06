@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { AddPhone } from '../components/AddPhone';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { CustomerPicker } from '../components/CustomerPicker';
-import { ApiError } from '../lib/api';
+import { describeError } from '../lib/errors';
 import { formatMoney } from '../lib/format';
 import { api, type BoardCell, type CustomerInput } from '../lib/rifas-api';
 
@@ -48,19 +48,15 @@ export function TicketDetail({
       onChanged();
     },
     onError: (cause: unknown) => {
-      setError(
-        cause instanceof ApiError && cause.body.code === 'PAYMENT_EXCEEDS_OUTSTANDING'
-          ? 'El abono es mayor a lo que falta por pagar.'
-          : 'No pudimos registrar el abono.',
-      );
+      setError(describeError(cause));
     },
   });
 
   const reassign = useMutation({
     mutationFn: (customer: CustomerInput) => api.reassign(cell.ticketId, customer),
     onSuccess: onChanged,
-    onError: () => {
-      setError('No pudimos pasar la boleta a otro cliente.');
+    onError: (cause: unknown) => {
+      setError(describeError(cause));
     },
   });
 
