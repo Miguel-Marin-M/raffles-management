@@ -1,9 +1,21 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { z } from 'zod';
 
 import { ChangeRaffleStatus } from '../../application/raffles/change-raffle-status.js';
 import { CreateRaffle } from '../../application/raffles/create-raffle.js';
+import { DeleteRaffle } from '../../application/raffles/delete-raffle.js';
 import { GetRaffleBoard } from '../../application/raffles/get-raffle-board.js';
 import { ListRaffles } from '../../application/raffles/list-raffles.js';
 import { RecordPrizeWinner } from '../../application/raffles/record-prize-winner.js';
@@ -50,6 +62,7 @@ export class RafflesController {
     private readonly changeRaffleStatus: ChangeRaffleStatus,
     private readonly getRaffleBoard: GetRaffleBoard,
     private readonly recordPrizeWinner: RecordPrizeWinner,
+    private readonly deleteRaffle: DeleteRaffle,
   ) {}
 
   @Get()
@@ -118,5 +131,15 @@ export class RafflesController {
     @Body(new ZodValidationPipe(statusSchema)) body: z.infer<typeof statusSchema>,
   ) {
     return this.changeRaffleStatus.execute({ actorId: user.id, raffleId, status: body.status });
+  }
+
+  @Delete(':raffleId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete a closed raffle from the history' })
+  async remove(
+    @CurrentUser() user: RequestUser,
+    @Param('raffleId') raffleId: string,
+  ): Promise<void> {
+    await this.deleteRaffle.execute({ actorId: user.id, raffleId });
   }
 }

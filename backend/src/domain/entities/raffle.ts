@@ -1,8 +1,10 @@
 import { ValidationError } from '../errors/domain-error.js';
 import {
+  ClosedRaffleIsFinalError,
   PrizeListError,
   RaffleAccessDeniedError,
   RaffleClosedError,
+  RaffleNotClosedError,
 } from '../errors/raffle-errors.js';
 import {
   EmptyTicketSelectionError,
@@ -240,12 +242,20 @@ export class Raffle {
   }
 
   /**
-   * Moves the raffle through its lifecycle. Every transition is allowed,
-   * including reopening a closed raffle, because a raffle can be postponed or
-   * closed by mistake and the organizer is the authority on that.
+   * Moves the raffle through its lifecycle. A draft can be published and an
+   * open raffle can be closed, but closing is one-way: the board of a drawn
+   * raffle is a record, and reopening it would let that record change.
    */
   changeStatus(status: RaffleStatus): void {
+    if (this.currentStatus === 'closed' && status !== 'closed') {
+      throw new ClosedRaffleIsFinalError(this.id);
+    }
     this.currentStatus = status;
+  }
+
+  /** Deleting is only offered from the history, so the raffle has to be there. */
+  ensureCanBeDeleted(): void {
+    if (this.currentStatus !== 'closed') throw new RaffleNotClosedError(this.id);
   }
 
   activate(): void {

@@ -18,6 +18,8 @@ const STATUS_BY_CODE: Record<string, HttpStatus> = {
   // Reported as not found so the existence of another organizer's raffle stays hidden.
   RAFFLE_ACCESS_DENIED: HttpStatus.NOT_FOUND,
   RAFFLE_CLOSED: HttpStatus.CONFLICT,
+  CLOSED_RAFFLE_IS_FINAL: HttpStatus.CONFLICT,
+  RAFFLE_NOT_CLOSED: HttpStatus.CONFLICT,
   INVALID_PRIZE_LIST: HttpStatus.BAD_REQUEST,
   CUSTOMER_NOT_FOUND: HttpStatus.NOT_FOUND,
   DUPLICATE_CUSTOMER_PHONE: HttpStatus.CONFLICT,

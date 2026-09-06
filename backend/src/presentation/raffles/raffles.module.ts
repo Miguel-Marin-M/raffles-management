@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 
 import { ChangeRaffleStatus } from '../../application/raffles/change-raffle-status.js';
 import { CreateRaffle } from '../../application/raffles/create-raffle.js';
+import { DeleteRaffle } from '../../application/raffles/delete-raffle.js';
 import { GetRaffleBoard } from '../../application/raffles/get-raffle-board.js';
 import { ListRaffles } from '../../application/raffles/list-raffles.js';
 import { RecordPrizeWinner } from '../../application/raffles/record-prize-winner.js';
@@ -41,6 +42,11 @@ import { RafflesController } from './raffles.controller.js';
     {
       provide: ChangeRaffleStatus,
       useFactory: (raffles: RaffleRepository) => new ChangeRaffleStatus(raffles),
+      inject: [RAFFLE_REPOSITORY],
+    },
+    {
+      provide: DeleteRaffle,
+      useFactory: (raffles: RaffleRepository) => new DeleteRaffle(raffles),
       inject: [RAFFLE_REPOSITORY],
     },
     {
