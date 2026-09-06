@@ -1,11 +1,13 @@
 import { useState, type FormEvent } from 'react';
 
-import type { CreateRaffleInput } from '../lib/rifas-api';
+import type { CreateRaffleInput, Raffle } from '../lib/rifas-api';
 
 interface RaffleFormProps {
   readonly busy: boolean;
   readonly error: unknown;
   readonly onSubmit: (input: CreateRaffleInput) => void;
+  /** When present the form edits that raffle instead of creating a new one. */
+  readonly initial?: Raffle;
 }
 
 const RANGES = [
@@ -13,39 +15,68 @@ const RANGES = [
   { label: '000 – 999', min: 0, max: 999, digits: 3 },
 ] as const;
 
+/** Date input wants yyyy-mm-dd; the API speaks ISO timestamps. */
+function toDateInput(iso: string | null | undefined): string {
+  return iso == null ? '' : new Date(iso).toISOString().slice(0, 10);
+}
+
 /**
  * Raffle setup: price, range and the prize list.
  *
  * Prizes are a growing list of rows rather than a fixed set of fields, because
  * an organizer decides how many prizes the raffle has while filling the form.
+ *
+ * The number range only appears while creating: once boletas are out there,
+ * moving the range would strand the numbers people already bought.
  */
-export function RaffleForm({ busy, error, onSubmit }: RaffleFormProps): React.JSX.Element {
-  const [name, setName] = useState('');
-  const [price, setPrice] = useState('');
+export function RaffleForm({
+  busy,
+  error,
+  onSubmit,
+  initial,
+}: RaffleFormProps): React.JSX.Element {
+  const editing = initial !== undefined;
+
+  const [name, setName] = useState(initial?.name ?? '');
+  const [price, setPrice] = useState(
+    initial === undefined ? '' : String(initial.ticketPriceMinorUnits),
+  );
   const [rangeIndex, setRangeIndex] = useState(0);
-  const [lottery, setLottery] = useState('');
-  const [drawDate, setDrawDate] = useState('');
-  const [prizes, setPrizes] = useState<string[]>(['']);
+  const [lottery, setLottery] = useState(initial?.lotteryReference ?? '');
+  const [drawDate, setDrawDate] = useState(toDateInput(initial?.drawDate));
+  const [prizes, setPrizes] = useState<string[]>(
+    initial === undefined || initial.prizes.length === 0
+      ? ['']
+      : initial.prizes.map((prize) => prize.title),
+  );
 
   const range = RANGES[rangeIndex] ?? RANGES[0];
 
   function submit(event: FormEvent): void {
     event.preventDefault();
 
-    onSubmit({
+    const common = {
       name,
       ticketPriceMinorUnits: Number(price),
-      numberMin: range.min,
-      numberMax: range.max,
-      numberDigits: range.digits,
       lotteryReference: lottery === '' ? null : lottery,
       drawDate: drawDate === '' ? null : new Date(`${drawDate}T12:00:00`).toISOString(),
       prizes: prizes
         .map((title) => title.trim())
         .filter((title) => title !== '')
         .map((title) => ({ title })),
-      status: 'active',
-    });
+    };
+
+    onSubmit(
+      editing
+        ? common
+        : {
+            ...common,
+            numberMin: range.min,
+            numberMax: range.max,
+            numberDigits: range.digits,
+            status: 'active',
+          },
+    );
   }
 
   return (
@@ -77,30 +108,37 @@ export function RaffleForm({ busy, error, onSubmit }: RaffleFormProps): React.JS
           placeholder="10000"
           required
         />
+        {editing ? (
+          <span className="text-xs text-tinta-suave">
+            El valor nuevo aplica a lo que falta por cobrar.
+          </span>
+        ) : null}
       </label>
 
-      <fieldset className="flex flex-col gap-1">
-        <legend className="rotulo">Números</legend>
-        <div className="mt-1 flex gap-2">
-          {RANGES.map((option, index) => (
-            <button
-              key={option.label}
-              type="button"
-              onClick={() => {
-                setRangeIndex(index);
-              }}
-              aria-pressed={rangeIndex === index}
-              className={`cifra min-h-11 flex-1 border px-3 ${
-                rangeIndex === index
-                  ? 'border-tinta bg-tinta text-papel-alto'
-                  : 'border-linea bg-papel-alto'
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      </fieldset>
+      {editing ? null : (
+        <fieldset className="flex flex-col gap-1">
+          <legend className="rotulo">Números</legend>
+          <div className="mt-1 flex gap-2">
+            {RANGES.map((option, index) => (
+              <button
+                key={option.label}
+                type="button"
+                onClick={() => {
+                  setRangeIndex(index);
+                }}
+                aria-pressed={rangeIndex === index}
+                className={`cifra min-h-11 flex-1 border px-3 ${
+                  rangeIndex === index
+                    ? 'border-tinta bg-tinta text-papel-alto'
+                    : 'border-linea bg-papel-alto'
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         <label className="flex flex-col gap-1">
@@ -165,16 +203,21 @@ export function RaffleForm({ busy, error, onSubmit }: RaffleFormProps): React.JS
         >
           Añadir otro premio
         </button>
+        {editing ? (
+          <p className="text-xs text-tinta-suave">
+            Al guardar se reemplaza la lista completa de premios.
+          </p>
+        ) : null}
       </fieldset>
 
       {error !== null && error !== undefined ? (
         <p role="alert" className="border-l-2 border-sello pl-3 text-sm text-sello">
-          No pudimos crear la rifa. Revisa el nombre y el valor de la boleta.
+          No pudimos guardar la rifa. Revisa el nombre y el valor de la boleta.
         </p>
       ) : null}
 
       <button type="submit" className="boton" disabled={busy}>
-        {busy ? 'Creando…' : 'Crear rifa'}
+        {busy ? 'Guardando…' : editing ? 'Guardar cambios' : 'Crear rifa'}
       </button>
     </form>
   );
