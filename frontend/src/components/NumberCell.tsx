@@ -43,8 +43,8 @@ export function NumberCell({
       data-state={state}
       className={[
         'relative aspect-square w-full select-none',
-        'rounded-[3px] border transition-[background-color,border-color,transform] duration-150',
-        'font-display text-[clamp(1rem,4.4vw,1.35rem)] font-semibold tabular-nums',
+        'rounded-[2px] border transition-[background-color,border-color,transform] duration-150',
+        'font-display text-[length:var(--celda-cuerpo)] font-semibold tabular-nums',
         'active:scale-[0.97]',
         state === 'free' ? 'border-linea bg-papel-alto text-tinta' : '',
         state === 'reserved' ? 'border-sello bg-sello/12 text-sello' : '',
@@ -53,7 +53,7 @@ export function NumberCell({
       ]
         .filter(Boolean)
         .join(' ')}
-      style={{ fontStretch: '112%' }}
+      style={{ fontStretch: 'var(--celda-ancho)' }}
     >
       {label}
 
@@ -79,7 +79,7 @@ export function NumberCell({
       {state === 'reserved' ? (
         <span
           aria-hidden="true"
-          className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-sello"
+          className="absolute right-0.5 top-0.5 h-1 w-1 rounded-full bg-sello sm:right-1 sm:top-1 sm:h-1.5 sm:w-1.5"
         />
       ) : null}
     </button>
