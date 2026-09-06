@@ -23,3 +23,11 @@ export function formatDate(iso: string | null): string | null {
   if (iso === null) return null;
   return new Intl.DateTimeFormat('es-CO', { dateStyle: 'long' }).format(new Date(iso));
 }
+
+/** Day and month only, the way a raffle poster announces its draw. */
+export function formatDayMonth(iso: string | null): string | null {
+  if (iso === null) return null;
+  return new Intl.DateTimeFormat('es-CO', { day: 'numeric', month: 'long' }).format(
+    new Date(iso),
+  );
+}
