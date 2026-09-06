@@ -14,6 +14,7 @@ export interface BoardCell {
   readonly status: TicketStatus;
   readonly customerId: string;
   readonly customerName: string;
+  readonly customerPhone: string | null;
   readonly amountPaidMinorUnits: number;
   readonly outstandingMinorUnits: number;
   readonly notes: string | null;
@@ -58,7 +59,7 @@ export class GetRaffleBoard {
     const customers = await this.customers.findManyByIds([
       ...new Set(tickets.map((ticket) => ticket.customerId)),
     ]);
-    const names = new Map(customers.map((customer) => [customer.id, customer.name]));
+    const byId = new Map(customers.map((customer) => [customer.id, customer]));
 
     let collected = Money.zero(raffle.currency);
     let pending = Money.zero(raffle.currency);
@@ -76,7 +77,8 @@ export class GetRaffleBoard {
         label: raffle.range.format(ticket.number),
         status: ticket.status,
         customerId: ticket.customerId,
-        customerName: names.get(ticket.customerId) ?? '',
+        customerName: byId.get(ticket.customerId)?.name ?? '',
+        customerPhone: byId.get(ticket.customerId)?.phone?.value ?? null,
         amountPaidMinorUnits: ticket.amountPaid.minorUnits,
         outstandingMinorUnits: outstanding.minorUnits,
         notes: ticket.notes,
