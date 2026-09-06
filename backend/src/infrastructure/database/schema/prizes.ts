@@ -17,6 +17,8 @@ export const prizes = pgTable(
     position: integer('position').notNull(),
     title: text('title').notNull(),
     description: text('description'),
+    /** Number drawn for this prize; null until the raffle is played. */
+    winningNumber: integer('winning_number'),
 
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
