@@ -36,26 +36,26 @@ export function RafflesScreen(): React.JSX.Element {
     <main className="mx-auto w-full max-w-2xl px-4 pb-28 pt-6">
       <header className="flex items-baseline justify-between">
         <div>
-          <p className="rotulo">Rifas de {user?.name ?? 'tu cuenta'}</p>
+          <p className="eyebrow">Rifas de {user?.name ?? 'tu cuenta'}</p>
           <h1 className="text-3xl" style={{ fontStretch: '116%' }}>
             Tus rifas
           </h1>
         </div>
         <button
           type="button"
-          className="text-sm text-tinta-suave underline underline-offset-4"
+          className="text-sm text-ink-soft underline underline-offset-4"
           onClick={() => void logout()}
         >
           Salir
         </button>
       </header>
 
-      {raffles.isPending ? <p className="mt-8 text-tinta-suave">Cargando…</p> : null}
+      {raffles.isPending ? <p className="mt-8 text-ink-soft">Cargando…</p> : null}
 
       {raffles.data?.length === 0 ? (
-        <div className="mt-10 border border-dashed border-linea px-5 py-10 text-center">
+        <div className="mt-10 border border-dashed border-rule px-5 py-10 text-center">
           <p className="font-display text-lg">Todavía no tienes rifas.</p>
-          <p className="mt-1 text-tinta-suave">
+          <p className="mt-1 text-ink-soft">
             Crea la primera, define el valor de la boleta y empieza a apartar números.
           </p>
         </div>
@@ -67,13 +67,13 @@ export function RafflesScreen(): React.JSX.Element {
             <Link
               to="/raffles/$raffleId/board"
               params={{ raffleId: raffle.id }}
-              className="block w-full border border-linea bg-papel-alto px-4 py-4 text-left transition-colors hover:border-tinta"
+              className="block w-full border border-rule bg-sheet px-4 py-4 text-left transition-colors hover:border-ink"
             >
               <div className="flex items-baseline justify-between gap-3">
                 <h2 className="text-xl leading-tight">{raffle.name}</h2>
-                <span className="rotulo shrink-0">{STATUS_COPY[raffle.status]}</span>
+                <span className="eyebrow shrink-0">{STATUS_COPY[raffle.status]}</span>
               </div>
-              <p className="cifra mt-2 text-sm text-tinta-suave">
+              <p className="numeric mt-2 text-sm text-ink-soft">
                 {formatMoney(raffle.ticketPriceMinorUnits, raffle.currency)} la boleta ·{' '}
                 {raffle.ticketCount} números
               </p>
@@ -88,11 +88,11 @@ export function RafflesScreen(): React.JSX.Element {
         ))}
       </ul>
 
-      <div className="fixed inset-x-0 bottom-0 border-t border-linea bg-papel/95 px-4 py-3 backdrop-blur">
+      <div className="fixed inset-x-0 bottom-0 border-t border-rule bg-paper/95 px-4 py-3 backdrop-blur">
         <div className="mx-auto max-w-2xl">
           <button
             type="button"
-            className="boton w-full"
+            className="btn w-full"
             onClick={() => {
               setCreating(true);
             }}

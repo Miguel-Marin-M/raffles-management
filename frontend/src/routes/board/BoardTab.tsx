@@ -64,7 +64,7 @@ export function BoardTab(): React.JSX.Element {
   return (
     <>
       {conflict !== null ? (
-        <p role="alert" className="mb-4 border-l-2 border-sello pl-3 text-sm text-sello">
+        <p role="alert" className="mb-4 border-l-2 border-stamp pl-3 text-sm text-stamp">
           {conflict.length === 1
             ? `El ${String(conflict[0]).padStart(raffle.numberDigits, '0')} lo apartaron primero.`
             : `Estos números ya estaban apartados: ${conflict
@@ -84,16 +84,16 @@ export function BoardTab(): React.JSX.Element {
       <Legend />
 
       {selected.size > 0 ? (
-        <div className="fixed inset-x-0 bottom-0 border-t border-tinta bg-papel-alto px-4 py-3">
+        <div className="fixed inset-x-0 bottom-0 border-t border-ink bg-sheet px-4 py-3">
           <div className="mx-auto flex max-w-2xl items-center gap-3">
             <div className="min-w-0 flex-1">
-              <p className="cifra text-sm">
+              <p className="numeric text-sm">
                 {selected.size} {selected.size === 1 ? 'boleta' : 'boletas'} ·{' '}
                 {formatMoney(selectionTotal, raffle.currency)}
               </p>
               <button
                 type="button"
-                className="text-xs text-tinta-suave underline underline-offset-4"
+                className="text-xs text-ink-soft underline underline-offset-4"
                 onClick={() => {
                   setSelected(new Set());
                 }}
@@ -103,7 +103,7 @@ export function BoardTab(): React.JSX.Element {
             </div>
             <button
               type="button"
-              className="boton"
+              className="btn"
               onClick={() => {
                 setReserving(true);
               }}
@@ -141,19 +141,19 @@ export function BoardTab(): React.JSX.Element {
 
 function Legend(): React.JSX.Element {
   return (
-    <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs text-tinta-suave">
+    <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs text-ink-soft">
       <li className="flex items-center gap-2">
-        <span className="h-3 w-3 border border-linea bg-papel-alto" aria-hidden="true" />
+        <span className="h-3 w-3 border border-rule bg-sheet" aria-hidden="true" />
         Libre
       </li>
       <li className="flex items-center gap-2">
-        <span className="h-3 w-3 border border-sello bg-sello/12" aria-hidden="true" />
+        <span className="h-3 w-3 border border-stamp bg-stamp/12" aria-hidden="true" />
         Apartada
       </li>
       <li className="flex items-center gap-2">
         <svg viewBox="0 0 12 12" className="h-3 w-3" aria-hidden="true">
-          <rect width="12" height="12" fill="none" stroke="var(--color-linea)" />
-          <path d="M2 10 L10 2" stroke="var(--color-cancelado)" strokeWidth="1.6" />
+          <rect width="12" height="12" fill="none" stroke="var(--color-rule)" />
+          <path d="M2 10 L10 2" stroke="var(--color-paid)" strokeWidth="1.6" />
         </svg>
         Pagada
       </li>

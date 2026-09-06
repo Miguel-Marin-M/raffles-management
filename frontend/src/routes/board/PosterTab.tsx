@@ -13,18 +13,18 @@ export function PosterTab(): React.JSX.Element {
 
   return (
     <section className="flex flex-col gap-3">
-      <p className="text-sm text-tinta-suave">
+      <p className="text-sm text-ink-soft">
         Así ven la rifa tus clientes. Ábrelo en pantalla completa y tómale una captura para
         mandarlo por WhatsApp.
       </p>
 
-      <div className="border border-linea">
+      <div className="border border-rule">
         <Poster board={board} />
       </div>
 
       <button
         type="button"
-        className="boton"
+        className="btn"
         onClick={() => {
           setFullscreen(true);
         }}
@@ -33,7 +33,7 @@ export function PosterTab(): React.JSX.Element {
       </button>
 
       {fullscreen ? (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-papel">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-paper">
           {/* Kept out of the poster frame so it never lands in the screenshot. */}
           <div className="flex justify-end px-4 py-2">
             <button

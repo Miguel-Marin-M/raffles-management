@@ -42,17 +42,17 @@ export function SummaryPanel({
   return (
     <div className="flex flex-col gap-6">
       <section>
-        <h3 className="rotulo">Premios</h3>
+        <h3 className="eyebrow">Premios</h3>
         {raffle.prizes.length === 0 ? (
-          <p className="mt-2 text-tinta-suave">Esta rifa todavía no tiene premios cargados.</p>
+          <p className="mt-2 text-ink-soft">Esta rifa todavía no tiene premios cargados.</p>
         ) : (
           <ol className="mt-2 flex flex-col">
             {raffle.prizes.map((prize) => (
               <li
                 key={prize.id}
-                className="flex items-baseline gap-3 border-b border-linea py-2 last:border-b-0"
+                className="flex items-baseline gap-3 border-b border-rule py-2 last:border-b-0"
               >
-                <span className="cifra w-6 shrink-0 text-sm text-loteria">{prize.position}</span>
+                <span className="numeric w-6 shrink-0 text-sm text-lottery">{prize.position}</span>
                 <div className="flex flex-1 flex-col items-start">
                   <span>{prize.title}</span>
                   <PrizeWinner
@@ -70,7 +70,7 @@ export function SummaryPanel({
       </section>
 
       <section>
-        <h3 className="rotulo">Cuentas</h3>
+        <h3 className="eyebrow">Cuentas</h3>
         <dl className="mt-2 flex flex-col">
           <Row label="Boletas vendidas" value={`${summary.totalNumbers - summary.freeNumbers} de ${summary.totalNumbers}`} />
           <Row label="Pagadas" value={String(summary.paidNumbers)} />
@@ -91,7 +91,7 @@ export function SummaryPanel({
       </section>
 
       <section>
-        <h3 className="rotulo">Sorteo</h3>
+        <h3 className="eyebrow">Sorteo</h3>
         <p className="mt-2">
           {drawDate ?? 'Sin fecha definida'}
           {raffle.lotteryReference === null ? '' : ` · ${raffle.lotteryReference}`}
@@ -99,18 +99,18 @@ export function SummaryPanel({
       </section>
 
       <div className="flex flex-col gap-2">
-        <button type="button" className="boton" onClick={onEdit}>
+        <button type="button" className="btn" onClick={onEdit}>
           Editar rifa y premios
         </button>
 
-        <button type="button" className="boton boton-secundario" onClick={exportCsv}>
+        <button type="button" className="btn btn-secondary" onClick={exportCsv}>
           Descargar boletas en CSV
         </button>
 
         {raffle.status === 'closed' ? (
           <button
             type="button"
-            className="boton boton-secundario"
+            className="btn btn-secondary"
             disabled={busy}
             onClick={() => {
               onChangeStatus('active');
@@ -121,7 +121,7 @@ export function SummaryPanel({
         ) : (
           <button
             type="button"
-            className="boton boton-secundario"
+            className="btn btn-secondary"
             disabled={busy}
             onClick={() => {
               onChangeStatus('closed');
@@ -130,7 +130,7 @@ export function SummaryPanel({
             Cerrar la rifa
           </button>
         )}
-        <p className="text-xs text-tinta-suave">
+        <p className="text-xs text-ink-soft">
           Al cerrarla, el tablero queda como registro y ya no se pueden apartar ni cobrar
           boletas.
         </p>
@@ -141,9 +141,9 @@ export function SummaryPanel({
 
 function Row({ label, value }: { label: string; value: string }): React.JSX.Element {
   return (
-    <div className="flex items-baseline justify-between gap-3 border-b border-linea py-2 last:border-b-0">
-      <dt className="text-tinta-suave">{label}</dt>
-      <dd className="cifra">{value}</dd>
+    <div className="flex items-baseline justify-between gap-3 border-b border-rule py-2 last:border-b-0">
+      <dt className="text-ink-soft">{label}</dt>
+      <dd className="numeric">{value}</dd>
     </div>
   );
 }

@@ -43,10 +43,10 @@ export function ConfirmDialog({
       onClick={(event) => {
         if (event.target === ref.current) onCancel();
       }}
-      className="mx-auto my-auto w-[min(28rem,calc(100vw-2rem))] rounded-sm border border-tinta bg-papel-alto p-0 text-tinta backdrop:bg-tinta/45"
+      className="mx-auto my-auto w-[min(28rem,calc(100vw-2rem))] rounded-sm border border-ink bg-sheet p-0 text-ink backdrop:bg-ink/45"
       aria-labelledby="confirmar-titulo"
     >
-      <div className="border-b border-linea px-4 py-3">
+      <div className="border-b border-rule px-4 py-3">
         <h2 id="confirmar-titulo" className="text-lg leading-tight">
           {title}
         </h2>
@@ -54,11 +54,11 @@ export function ConfirmDialog({
 
       <div className="px-4 py-4">{children}</div>
 
-      <div className="flex gap-2 border-t border-linea px-4 py-3">
-        <button type="button" className="boton flex-1" onClick={onConfirm} disabled={busy}>
+      <div className="flex gap-2 border-t border-rule px-4 py-3">
+        <button type="button" className="btn flex-1" onClick={onConfirm} disabled={busy}>
           {busy ? 'Guardando…' : confirmLabel}
         </button>
-        <button type="button" className="boton boton-secundario" onClick={onCancel}>
+        <button type="button" className="btn btn-secondary" onClick={onCancel}>
           Cancelar
         </button>
       </div>

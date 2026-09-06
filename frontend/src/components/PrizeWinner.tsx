@@ -34,10 +34,10 @@ export function PrizeWinner({
   if (prize.winningNumber !== null && !editing) {
     return (
       <div className="mt-1 flex flex-wrap items-baseline gap-x-2 text-sm">
-        <span className="cifra bg-loteria px-2 py-0.5 font-semibold">
+        <span className="numeric bg-lottery px-2 py-0.5 font-semibold">
           Ganó el {String(prize.winningNumber).padStart(raffle.numberDigits, '0')}
         </span>
-        <span className="text-tinta-suave">
+        <span className="text-ink-soft">
           {holder === undefined ? 'Nadie compró ese número' : holder.customerName}
         </span>
         <button
@@ -71,9 +71,9 @@ export function PrizeWinner({
   return (
     <div className="mt-1 flex flex-wrap items-end gap-2">
       <label className="flex flex-col gap-1">
-        <span className="rotulo">Número ganador</span>
+        <span className="eyebrow">Número ganador</span>
         <input
-          className="campo cifra w-28"
+          className="field numeric w-28"
           type="number"
           inputMode="numeric"
           min={raffle.numberMin}
@@ -88,7 +88,7 @@ export function PrizeWinner({
       </label>
       <button
         type="button"
-        className="boton"
+        className="btn"
         disabled={value === '' || busy}
         onClick={() => {
           onRecord(prize.id, Number(value));
@@ -99,7 +99,7 @@ export function PrizeWinner({
       </button>
       <button
         type="button"
-        className="min-h-11 text-sm text-tinta-suave underline underline-offset-4"
+        className="min-h-11 text-sm text-ink-soft underline underline-offset-4"
         onClick={() => {
           setEditing(false);
         }}
@@ -109,7 +109,7 @@ export function PrizeWinner({
       {prize.winningNumber === null ? null : (
         <button
           type="button"
-          className="min-h-11 text-sm text-sello underline underline-offset-4"
+          className="min-h-11 text-sm text-stamp underline underline-offset-4"
           onClick={() => {
             onRecord(prize.id, null);
             setEditing(false);

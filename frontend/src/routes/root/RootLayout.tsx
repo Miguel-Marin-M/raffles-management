@@ -12,7 +12,7 @@ export function RootLayout(): React.JSX.Element {
   const { user, status } = useSession();
 
   if (status === 'checking') {
-    return <p className="px-4 py-10 text-tinta-suave">Abriendo tu talonario…</p>;
+    return <p className="px-4 py-10 text-ink-soft">Abriendo tu talonario…</p>;
   }
 
   return user === null ? <AccessScreen /> : <Outlet />;

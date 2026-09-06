@@ -100,9 +100,9 @@ export function CustomersPanel({
 
   if (rows.length === 0) {
     return (
-      <div className="border border-dashed border-linea px-5 py-10 text-center">
+      <div className="border border-dashed border-rule px-5 py-10 text-center">
         <p className="font-display text-lg">Nadie ha apartado todavía.</p>
-        <p className="mt-1 text-tinta-suave">
+        <p className="mt-1 text-ink-soft">
           Ve al tablero, toca los números libres y apártalos a nombre de tu cliente.
         </p>
       </div>
@@ -111,7 +111,7 @@ export function CustomersPanel({
 
   return (
     <>
-      <p className="mb-3 text-sm text-tinta-suave">
+      <p className="mb-3 text-sm text-ink-soft">
         Toca los números apartados para escoger cuáles te está pagando ahora.
       </p>
 
@@ -121,12 +121,12 @@ export function CustomersPanel({
           const isActive = selection?.customerId === row.id;
 
           return (
-            <li key={row.id} className="border border-linea bg-papel-alto px-4 py-3">
+            <li key={row.id} className="border border-rule bg-sheet px-4 py-3">
               <div className="flex items-baseline justify-between gap-3">
                 <h3 className="text-lg leading-tight">{row.name}</h3>
                 <span
-                  className={`cifra shrink-0 text-sm ${
-                    row.owed === 0 ? 'text-cancelado' : 'text-sello'
+                  className={`numeric shrink-0 text-sm ${
+                    row.owed === 0 ? 'text-paid' : 'text-stamp'
                   }`}
                 >
                   {row.owed === 0 ? 'al día' : `debe ${formatMoney(row.owed, raffle.currency)}`}
@@ -145,12 +145,12 @@ export function CustomersPanel({
                       onClick={() => {
                         toggle(row, cell);
                       }}
-                      className={`cifra min-h-9 border px-2 py-0.5 text-sm ${
+                      className={`numeric min-h-9 border px-2 py-0.5 text-sm ${
                         cell.status === 'paid'
-                          ? 'border-linea text-tinta-suave line-through decoration-cancelado decoration-2'
+                          ? 'border-rule text-ink-soft line-through decoration-paid decoration-2'
                           : selected
-                            ? 'border-tinta bg-tinta text-papel-alto'
-                            : 'border-sello text-sello'
+                            ? 'border-ink bg-ink text-sheet'
+                            : 'border-stamp text-stamp'
                       }`}
                     >
                       {cell.label}
@@ -174,9 +174,9 @@ export function CustomersPanel({
                 ) : null}
               </div>
 
-              <div className="mt-2 text-xs text-tinta-suave">
+              <div className="mt-2 text-xs text-ink-soft">
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-2">
-                  <span className="cifra">
+                  <span className="numeric">
                     {row.cells.length} {row.cells.length === 1 ? 'boleta' : 'boletas'} · abonado{' '}
                     {formatMoney(row.paid, raffle.currency)}
                   </span>
@@ -184,7 +184,7 @@ export function CustomersPanel({
                 {row.phone === null ? (
                   <AddPhone customerId={row.id} onSaved={onCustomerChanged} />
                 ) : (
-                  <a className="cifra underline underline-offset-4" href={`tel:${row.phone}`}>
+                  <a className="numeric underline underline-offset-4" href={`tel:${row.phone}`}>
                     {row.phone}
                   </a>
                 )}
@@ -195,17 +195,17 @@ export function CustomersPanel({
       </ul>
 
       {activeRow !== null && selectedCells.length > 0 ? (
-        <div className="fixed inset-x-0 bottom-0 border-t border-tinta bg-papel-alto px-4 py-3">
+        <div className="fixed inset-x-0 bottom-0 border-t border-ink bg-sheet px-4 py-3">
           <div className="mx-auto flex max-w-2xl items-center gap-3">
             <div className="min-w-0 flex-1">
-              <p className="cifra truncate text-sm">
+              <p className="numeric truncate text-sm">
                 {activeRow.name} · {selectedCells.length}{' '}
                 {selectedCells.length === 1 ? 'boleta' : 'boletas'} ·{' '}
                 {formatMoney(selectedTotal, raffle.currency)}
               </p>
               <button
                 type="button"
-                className="text-xs text-tinta-suave underline underline-offset-4"
+                className="text-xs text-ink-soft underline underline-offset-4"
                 onClick={() => {
                   setSelection(null);
                 }}
@@ -215,7 +215,7 @@ export function CustomersPanel({
             </div>
             <button
               type="button"
-              className="boton"
+              className="btn"
               disabled={busy}
               onClick={() => {
                 setConfirming(true);
@@ -246,12 +246,12 @@ export function CustomersPanel({
         <p>
           Vas a registrar {formatMoney(selectedTotal, raffle.currency)} de{' '}
           {activeRow?.name ?? 'este cliente'} por{' '}
-          <span className="cifra">
+          <span className="numeric">
             {selectedCells.map((cell) => cell.label).join(', ')}
           </span>
           .
         </p>
-        <p className="mt-2 text-tinta-suave">
+        <p className="mt-2 text-ink-soft">
           Una vez pagadas, esas boletas no se pueden liberar ni pasar a otro cliente. Esto no se
           puede deshacer.
         </p>

@@ -33,22 +33,22 @@ export function AccessScreen(): React.JSX.Element {
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-5 py-10">
-      <p className="rotulo">Gestión de rifas</p>
+      <p className="eyebrow">Gestión de rifas</p>
       <h1 className="mt-1 text-4xl leading-none" style={{ fontStretch: '118%' }}>
         Tu talonario,
         <br />
         en el bolsillo.
       </h1>
-      <p className="mt-3 max-w-sm text-tinta-suave">
+      <p className="mt-3 max-w-sm text-ink-soft">
         Apunta quién apartó cada número y quién ya pagó, sin cargar el cuaderno.
       </p>
 
       <form onSubmit={submit} className="mt-8 flex flex-col gap-3">
         {mode === 'register' ? (
           <label className="flex flex-col gap-1">
-            <span className="rotulo">Nombre</span>
+            <span className="eyebrow">Nombre</span>
             <input
-              className="campo"
+              className="field"
               value={name}
               onChange={(event) => {
                 setName(event.target.value);
@@ -60,9 +60,9 @@ export function AccessScreen(): React.JSX.Element {
         ) : null}
 
         <label className="flex flex-col gap-1">
-          <span className="rotulo">Correo</span>
+          <span className="eyebrow">Correo</span>
           <input
-            className="campo"
+            className="field"
             type="email"
             value={email}
             onChange={(event) => {
@@ -74,9 +74,9 @@ export function AccessScreen(): React.JSX.Element {
         </label>
 
         <label className="flex flex-col gap-1">
-          <span className="rotulo">Contraseña</span>
+          <span className="eyebrow">Contraseña</span>
           <input
-            className="campo"
+            className="field"
             type="password"
             value={password}
             onChange={(event) => {
@@ -89,12 +89,12 @@ export function AccessScreen(): React.JSX.Element {
         </label>
 
         {error !== null ? (
-          <p role="alert" className="border-l-2 border-sello pl-3 text-sm text-sello">
+          <p role="alert" className="border-l-2 border-stamp pl-3 text-sm text-stamp">
             {error}
           </p>
         ) : null}
 
-        <button type="submit" className="boton mt-2" disabled={busy}>
+        <button type="submit" className="btn mt-2" disabled={busy}>
           {mode === 'login' ? 'Entrar' : 'Crear cuenta'}
         </button>
       </form>

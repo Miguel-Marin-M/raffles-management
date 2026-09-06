@@ -48,9 +48,9 @@ export function CustomerPicker({ onChange, autoFocus }: CustomerPickerProps): Re
   return (
     <div className="flex flex-col gap-3">
       <label className="flex flex-col gap-1">
-        <span className="rotulo">Cliente</span>
+        <span className="eyebrow">Cliente</span>
         <input
-          className="campo"
+          className="field"
           value={term}
           onChange={(event) => {
             typeName(event.target.value);
@@ -63,7 +63,7 @@ export function CustomerPicker({ onChange, autoFocus }: CustomerPickerProps): Re
       </label>
 
       {picked !== null ? (
-        <p className="text-sm text-cancelado">
+        <p className="text-sm text-paid">
           Usando la ficha de {picked.name}
           {picked.phone === null ? '' : ` · ${picked.phone}`}.{' '}
           <button
@@ -80,9 +80,9 @@ export function CustomerPicker({ onChange, autoFocus }: CustomerPickerProps): Re
       ) : null}
 
       {picked === null && (matches.data?.length ?? 0) > 0 ? (
-        <ul className="flex flex-col border border-linea">
+        <ul className="flex flex-col border border-rule">
           {matches.data?.map((customer) => (
-            <li key={customer.id} className="border-b border-linea last:border-b-0">
+            <li key={customer.id} className="border-b border-rule last:border-b-0">
               <button
                 type="button"
                 className="flex min-h-11 w-full items-baseline justify-between gap-3 px-3 py-2 text-left"
@@ -91,7 +91,7 @@ export function CustomerPicker({ onChange, autoFocus }: CustomerPickerProps): Re
                 }}
               >
                 <span>{customer.name}</span>
-                <span className="cifra shrink-0 text-xs text-tinta-suave">
+                <span className="numeric shrink-0 text-xs text-ink-soft">
                   {customer.phone ?? 'sin teléfono'}
                 </span>
               </button>
@@ -101,9 +101,9 @@ export function CustomerPicker({ onChange, autoFocus }: CustomerPickerProps): Re
       ) : null}
 
       <label className="flex flex-col gap-1">
-        <span className="rotulo">Teléfono</span>
+        <span className="eyebrow">Teléfono</span>
         <input
-          className="campo cifra"
+          className="field numeric"
           type="tel"
           inputMode="tel"
           value={phone}
@@ -114,7 +114,7 @@ export function CustomerPicker({ onChange, autoFocus }: CustomerPickerProps): Re
           disabled={picked !== null}
         />
         {picked === null ? (
-          <span className="text-xs text-tinta-suave">
+          <span className="text-xs text-ink-soft">
             Con el mismo teléfono reusamos la ficha del cliente.
           </span>
         ) : null}

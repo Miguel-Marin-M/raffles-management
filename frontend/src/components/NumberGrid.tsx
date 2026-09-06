@@ -59,8 +59,8 @@ export function NumberGrid({
       aria-label={`Tablero de ${raffle.name}`}
       style={
         {
-          '--celda-cuerpo': type?.size,
-          '--celda-ancho': type?.stretch,
+          '--cell-font-size': type?.size,
+          '--cell-font-stretch': type?.stretch,
         } as React.CSSProperties
       }
     >

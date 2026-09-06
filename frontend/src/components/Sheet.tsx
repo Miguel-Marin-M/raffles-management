@@ -31,14 +31,14 @@ export function Sheet({ open, title, onClose, children }: SheetProps): React.JSX
         // content rectangle is a click on the backdrop.
         if (event.target === ref.current) onClose();
       }}
-      className="w-full max-w-lg rounded-t-lg border border-linea bg-papel-alto p-0 text-tinta backdrop:bg-tinta/45 mt-auto mb-0 mx-auto sm:my-auto sm:rounded-lg"
+      className="w-full max-w-lg rounded-t-lg border border-rule bg-sheet p-0 text-ink backdrop:bg-ink/45 mt-auto mb-0 mx-auto sm:my-auto sm:rounded-lg"
     >
-      <div className="flex items-center justify-between border-b border-linea px-4 py-3">
+      <div className="flex items-center justify-between border-b border-rule px-4 py-3">
         <h2 className="text-lg">{title}</h2>
         <button
           type="button"
           onClick={onClose}
-          className="min-h-11 px-2 text-tinta-suave"
+          className="min-h-11 px-2 text-ink-soft"
           aria-label="Cerrar"
         >
           ✕

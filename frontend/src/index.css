@@ -10,16 +10,14 @@
   --font-sans: 'Instrument Sans', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 
-  --color-papel: #e9e7e1;
-  --color-papel-alto: #f4f2ee;
-  --color-tinta: #131a24;
-  --color-tinta-suave: #5b6472;
-  --color-linea: #c9c5bb;
-  --color-sello: #c8362a;
-  --color-cancelado: #2f6b4f;
-  --color-loteria: #e8b93b;
-
-  --radius-celda: 3px;
+  --color-paper: #e9e7e1;
+  --color-sheet: #f4f2ee;
+  --color-ink: #131a24;
+  --color-ink-soft: #5b6472;
+  --color-rule: #c9c5bb;
+  --color-stamp: #c8362a;
+  --color-paid: #2f6b4f;
+  --color-lottery: #e8b93b;
 }
 
 @layer base {
@@ -29,8 +27,8 @@
 
   body {
     margin: 0;
-    background-color: var(--color-papel);
-    color: var(--color-tinta);
+    background-color: var(--color-paper);
+    color: var(--color-ink);
     font-family: var(--font-sans);
     font-size: 15px;
     line-height: 1.5;
@@ -48,7 +46,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-tinta);
+    outline: 2px solid var(--color-ink);
     outline-offset: 2px;
   }
 
@@ -72,32 +70,32 @@
 
 @layer components {
   /* Small caps label used for section headers and field names. */
-  .rotulo {
+  .eyebrow {
     font-family: var(--font-display);
     font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--color-tinta-suave);
+    color: var(--color-ink-soft);
   }
 
-  .cifra {
+  .numeric {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.02em;
   }
 
-  .boton {
+  .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
     min-height: 48px;
     padding: 0 1.125rem;
-    border: 1px solid var(--color-tinta);
+    border: 1px solid var(--color-ink);
     border-radius: 2px;
-    background-color: var(--color-tinta);
-    color: var(--color-papel-alto);
+    background-color: var(--color-ink);
+    color: var(--color-sheet);
     font-family: var(--font-display);
     font-weight: 600;
     letter-spacing: 0.01em;
@@ -105,32 +103,32 @@
     transition: transform 120ms ease;
   }
 
-  .boton:active {
+  .btn:active {
     transform: translateY(1px);
   }
 
-  .boton:disabled {
+  .btn:disabled {
     opacity: 0.45;
     cursor: not-allowed;
   }
 
-  .boton-secundario {
+  .btn-secondary {
     background-color: transparent;
-    color: var(--color-tinta);
+    color: var(--color-ink);
   }
 
-  .campo {
+  .field {
     width: 100%;
     min-height: 48px;
     padding: 0.5rem 0.75rem;
-    border: 1px solid var(--color-linea);
+    border: 1px solid var(--color-rule);
     border-radius: 2px;
-    background-color: var(--color-papel-alto);
-    color: var(--color-tinta);
+    background-color: var(--color-sheet);
+    color: var(--color-ink);
   }
 
-  .campo::placeholder {
-    color: color-mix(in srgb, var(--color-tinta-suave) 70%, transparent);
+  .field::placeholder {
+    color: color-mix(in srgb, var(--color-ink-soft) 70%, transparent);
   }
 }
 
@@ -145,7 +143,7 @@
 }
 
 /* The pen stroke that crosses out a paid number. */
-@keyframes tachar {
+@keyframes strike {
   from {
     stroke-dashoffset: 1;
   }

@@ -115,9 +115,9 @@ export function RaffleLayout(): React.JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [board.data, busy, failure]);
 
-  if (board.isPending) return <p className="px-4 py-10 text-tinta-suave">Cargando tablero…</p>;
+  if (board.isPending) return <p className="px-4 py-10 text-ink-soft">Cargando tablero…</p>;
   if (value === null) {
-    return <p className="px-4 py-10 text-sello">No pudimos cargar la rifa.</p>;
+    return <p className="px-4 py-10 text-stamp">No pudimos cargar la rifa.</p>;
   }
 
   const { raffle } = value.board;
@@ -125,20 +125,20 @@ export function RaffleLayout(): React.JSX.Element {
   return (
     <BoardContext value={value}>
       <main className="mx-auto w-full max-w-2xl px-4 pb-32 pt-5">
-        <Link to="/raffles" className="rotulo mb-4 inline-flex min-h-11 items-center">
+        <Link to="/raffles" className="eyebrow mb-4 inline-flex min-h-11 items-center">
           ← Tus rifas
         </Link>
 
         <RaffleHeader board={value.board} />
 
-        <nav className="mb-5 flex border border-linea" aria-label="Secciones de la rifa">
+        <nav className="mb-5 flex border border-rule" aria-label="Secciones de la rifa">
           {TABS.map((tab) => (
             <Link
               key={tab.to}
               to={`/raffles/$raffleId/${tab.to}`}
               params={{ raffleId }}
-              className="min-h-11 flex-1 content-center text-center font-display text-sm font-semibold text-tinta-suave"
-              activeProps={{ className: 'bg-tinta text-papel-alto' }}
+              className="min-h-11 flex-1 content-center text-center font-display text-sm font-semibold text-ink-soft"
+              activeProps={{ className: 'bg-ink text-sheet' }}
             >
               {tab.label}
             </Link>
@@ -146,7 +146,7 @@ export function RaffleLayout(): React.JSX.Element {
         </nav>
 
         {value.actionError !== null ? (
-          <p role="alert" className="mb-4 border-l-2 border-sello pl-3 text-sm text-sello">
+          <p role="alert" className="mb-4 border-l-2 border-stamp pl-3 text-sm text-stamp">
             {value.actionError}
           </p>
         ) : null}
@@ -211,14 +211,14 @@ function RaffleHeader({ board }: { board: RaffleBoard }): React.JSX.Element {
       <h1 className="text-3xl leading-none" style={{ fontStretch: '116%' }}>
         {raffle.name}
       </h1>
-      <p className="cifra mt-1 text-sm text-tinta-suave">
+      <p className="numeric mt-1 text-sm text-ink-soft">
         {formatMoney(raffle.ticketPriceMinorUnits, raffle.currency)} la boleta
         {raffle.lotteryReference === null ? '' : ` · juega con ${raffle.lotteryReference}`}
         {raffle.status === 'closed' ? ' · cerrada' : ''}
       </p>
 
-      <div className="mt-4 h-2 w-full border border-linea bg-papel-alto" aria-hidden="true">
-        <div className="h-full bg-tinta" style={{ width: `${(progress * 100).toFixed(1)}%` }} />
+      <div className="mt-4 h-2 w-full border border-rule bg-sheet" aria-hidden="true">
+        <div className="h-full bg-ink" style={{ width: `${(progress * 100).toFixed(1)}%` }} />
       </div>
 
       <dl className="mt-3 grid grid-cols-3 gap-3">
@@ -226,12 +226,12 @@ function RaffleHeader({ board }: { board: RaffleBoard }): React.JSX.Element {
         <Stat
           label="Recaudado"
           value={formatMoney(summary.collectedMinorUnits, raffle.currency)}
-          tone="cancelado"
+          tone="paid"
         />
         <Stat
           label="Por cobrar"
           value={formatMoney(summary.pendingMinorUnits, raffle.currency)}
-          tone="sello"
+          tone="stamp"
         />
       </dl>
     </header>
@@ -245,14 +245,14 @@ function Stat({
 }: {
   label: string;
   value: string;
-  tone?: 'sello' | 'cancelado';
+  tone?: 'stamp' | 'paid';
 }): React.JSX.Element {
   return (
-    <div className="border-t border-tinta pt-2">
-      <dt className="rotulo">{label}</dt>
+    <div className="border-t border-ink pt-2">
+      <dt className="eyebrow">{label}</dt>
       <dd
-        className={`cifra text-base ${
-          tone === 'sello' ? 'text-sello' : tone === 'cancelado' ? 'text-cancelado' : ''
+        className={`numeric text-base ${
+          tone === 'stamp' ? 'text-stamp' : tone === 'paid' ? 'text-paid' : ''
         }`}
       >
         {value}

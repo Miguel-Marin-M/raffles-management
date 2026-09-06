@@ -37,7 +37,7 @@ export function Poster({ board }: PosterProps): React.JSX.Element {
   }
 
   return (
-    <article className="mx-auto w-full max-w-[26rem] bg-papel-alto px-5 py-7">
+    <article className="mx-auto w-full max-w-[26rem] bg-sheet px-5 py-7">
       <h2
         className="text-[2.75rem] font-extrabold leading-[0.92] tracking-tight"
         style={{ fontStretch: '125%' }}
@@ -47,7 +47,7 @@ export function Poster({ board }: PosterProps): React.JSX.Element {
 
       {drawDate === null ? null : (
         <p
-          className="mt-4 inline-block bg-loteria px-3 py-1.5 font-display text-sm font-semibold uppercase tracking-[0.12em]"
+          className="mt-4 inline-block bg-lottery px-3 py-1.5 font-display text-sm font-semibold uppercase tracking-[0.12em]"
         >
           Juega el {drawDate}
         </p>
@@ -58,9 +58,9 @@ export function Poster({ board }: PosterProps): React.JSX.Element {
           {raffle.prizes.map((prize) => (
             <li
               key={prize.id}
-              className="flex items-baseline gap-3 border-t border-linea py-2 last:border-b last:border-linea"
+              className="flex items-baseline gap-3 border-t border-rule py-2 last:border-b last:border-rule"
             >
-              <span className="cifra w-5 shrink-0 text-sm text-tinta-suave">{prize.position}</span>
+              <span className="numeric w-5 shrink-0 text-sm text-ink-soft">{prize.position}</span>
               <div className="flex flex-1 flex-col items-start">
                 <span
                   className="font-display text-lg font-semibold leading-tight"
@@ -70,11 +70,11 @@ export function Poster({ board }: PosterProps): React.JSX.Element {
                 </span>
                 {prize.winningNumber === null ? null : (
                   <span className="mt-1 text-sm">
-                    <span className="cifra bg-loteria px-1.5 py-0.5 font-semibold">
+                    <span className="numeric bg-lottery px-1.5 py-0.5 font-semibold">
                       Ganó el {String(prize.winningNumber).padStart(raffle.numberDigits, '0')}
                     </span>
                     {winnerName(prize.winningNumber) === null ? null : (
-                      <span className="ml-2 text-tinta-suave">
+                      <span className="ml-2 text-ink-soft">
                         {winnerName(prize.winningNumber)}
                       </span>
                     )}
@@ -95,8 +95,8 @@ export function Poster({ board }: PosterProps): React.JSX.Element {
               key={value}
               className={`text-center font-display text-[clamp(0.7rem,3vw,0.95rem)] font-semibold tabular-nums ${
                 sold
-                  ? 'text-tinta-suave/45 line-through decoration-sello decoration-2'
-                  : 'text-tinta'
+                  ? 'text-ink-soft/45 line-through decoration-stamp decoration-2'
+                  : 'text-ink'
               }`}
               style={{ fontStretch: '104%' }}
             >
@@ -106,14 +106,14 @@ export function Poster({ board }: PosterProps): React.JSX.Element {
         })}
       </div>
 
-      <p className="mt-2 text-xs text-tinta-suave">Los números tachados ya están vendidos.</p>
+      <p className="mt-2 text-xs text-ink-soft">Los números tachados ya están vendidos.</p>
 
-      <p className="cifra mt-4 inline-block bg-loteria px-3 py-2 text-2xl font-semibold">
+      <p className="numeric mt-4 inline-block bg-lottery px-3 py-2 text-2xl font-semibold">
         {formatMoney(raffle.ticketPriceMinorUnits, raffle.currency)} cada boleta
       </p>
 
       {raffle.lotteryReference === null ? null : (
-        <p className="mt-4 text-sm text-tinta-suave">
+        <p className="mt-4 text-sm text-ink-soft">
           Juega con la {raffle.lotteryReference}
         </p>
       )}

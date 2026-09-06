@@ -65,13 +65,13 @@ export function TicketDetail({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
-        <p className="rotulo">Cliente</p>
+        <p className="eyebrow">Cliente</p>
         <p className="text-lg">{cell.customerName}</p>
         {cell.customerPhone === null ? (
           <AddPhone customerId={cell.customerId} onSaved={onChanged} />
         ) : (
           <a
-            className="cifra self-start text-sm underline underline-offset-4"
+            className="numeric self-start text-sm underline underline-offset-4"
             href={`tel:${cell.customerPhone}`}
           >
             {cell.customerPhone}
@@ -80,29 +80,29 @@ export function TicketDetail({
       </div>
 
       <dl className="grid grid-cols-2 gap-3">
-        <div className="border-t border-tinta pt-2">
-          <dt className="rotulo">Abonado</dt>
-          <dd className="cifra text-base text-cancelado">
+        <div className="border-t border-ink pt-2">
+          <dt className="eyebrow">Abonado</dt>
+          <dd className="numeric text-base text-paid">
             {formatMoney(cell.amountPaidMinorUnits, currency)}
           </dd>
         </div>
-        <div className="border-t border-tinta pt-2">
-          <dt className="rotulo">Debe</dt>
-          <dd className="cifra text-base text-sello">
+        <div className="border-t border-ink pt-2">
+          <dt className="eyebrow">Debe</dt>
+          <dd className="numeric text-base text-stamp">
             {formatMoney(cell.outstandingMinorUnits, currency)}
           </dd>
         </div>
       </dl>
 
       {paid ? (
-        <p className="border-l-2 border-cancelado pl-3 text-sm">
+        <p className="border-l-2 border-paid pl-3 text-sm">
           Esta boleta está pagada. Ya no se puede liberar ni pasar a otro cliente.
         </p>
       ) : (
         <>
           <button
             type="button"
-            className="boton"
+            className="btn"
             disabled={busy}
             onClick={() => {
               setConfirming(true);
@@ -113,9 +113,9 @@ export function TicketDetail({
 
           <div className="flex items-end gap-2">
             <label className="flex flex-1 flex-col gap-1">
-              <span className="rotulo">Registrar un abono</span>
+              <span className="eyebrow">Registrar un abono</span>
               <input
-                className="campo cifra"
+                className="field numeric"
                 type="number"
                 inputMode="numeric"
                 min={1}
@@ -129,7 +129,7 @@ export function TicketDetail({
             </label>
             <button
               type="button"
-              className="boton boton-secundario"
+              className="btn btn-secondary"
               disabled={partial === '' || registerPayment.isPending}
               onClick={() => {
                 registerPayment.mutate(Number(partial));
@@ -142,18 +142,18 @@ export function TicketDetail({
       )}
 
       {error !== null ? (
-        <p role="alert" className="border-l-2 border-sello pl-3 text-sm text-sello">
+        <p role="alert" className="border-l-2 border-stamp pl-3 text-sm text-stamp">
           {error}
         </p>
       ) : null}
 
       {paid ? null : reassigning ? (
-        <div className="flex flex-col gap-3 border-t border-linea pt-4">
+        <div className="flex flex-col gap-3 border-t border-rule pt-4">
           <CustomerPicker onChange={setNewCustomer} autoFocus />
           <div className="flex gap-2">
             <button
               type="button"
-              className="boton flex-1"
+              className="btn flex-1"
               disabled={newCustomer === null || reassign.isPending}
               onClick={() => {
                 if (newCustomer !== null) reassign.mutate(newCustomer);
@@ -163,7 +163,7 @@ export function TicketDetail({
             </button>
             <button
               type="button"
-              className="boton boton-secundario"
+              className="btn btn-secondary"
               onClick={() => {
                 setReassigning(false);
               }}
@@ -188,14 +188,14 @@ export function TicketDetail({
         <>
           <button
             type="button"
-            className="self-start text-sm text-sello underline underline-offset-4"
+            className="self-start text-sm text-stamp underline underline-offset-4"
             onClick={onRelease}
             disabled={busy || cell.amountPaidMinorUnits > 0}
           >
             Liberar el número
           </button>
           {cell.amountPaidMinorUnits > 0 ? (
-            <p className="-mt-2 text-xs text-tinta-suave">
+            <p className="-mt-2 text-xs text-ink-soft">
               No se puede liberar una boleta con abonos: primero devuelve el dinero.
             </p>
           ) : null}
@@ -219,7 +219,7 @@ export function TicketDetail({
           Vas a registrar {formatMoney(cell.outstandingMinorUnits, currency)} de{' '}
           {cell.customerName}.
         </p>
-        <p className="mt-2 text-tinta-suave">
+        <p className="mt-2 text-ink-soft">
           Una vez pagada, la boleta no se puede liberar ni pasar a otro cliente. Esto no se
           puede deshacer.
         </p>

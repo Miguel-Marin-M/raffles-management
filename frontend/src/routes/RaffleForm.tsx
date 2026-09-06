@@ -82,9 +82,9 @@ export function RaffleForm({
   return (
     <form onSubmit={submit} className="flex flex-col gap-4">
       <label className="flex flex-col gap-1">
-        <span className="rotulo">Nombre de la rifa</span>
+        <span className="eyebrow">Nombre de la rifa</span>
         <input
-          className="campo"
+          className="field"
           value={name}
           onChange={(event) => {
             setName(event.target.value);
@@ -95,9 +95,9 @@ export function RaffleForm({
       </label>
 
       <label className="flex flex-col gap-1">
-        <span className="rotulo">Valor de la boleta</span>
+        <span className="eyebrow">Valor de la boleta</span>
         <input
-          className="campo cifra"
+          className="field numeric"
           type="number"
           inputMode="numeric"
           min={1}
@@ -109,7 +109,7 @@ export function RaffleForm({
           required
         />
         {editing ? (
-          <span className="text-xs text-tinta-suave">
+          <span className="text-xs text-ink-soft">
             El valor nuevo aplica a lo que falta por cobrar.
           </span>
         ) : null}
@@ -117,7 +117,7 @@ export function RaffleForm({
 
       {editing ? null : (
         <fieldset className="flex flex-col gap-1">
-          <legend className="rotulo">Números</legend>
+          <legend className="eyebrow">Números</legend>
           <div className="mt-1 flex gap-2">
             {RANGES.map((option, index) => (
               <button
@@ -127,10 +127,10 @@ export function RaffleForm({
                   setRangeIndex(index);
                 }}
                 aria-pressed={rangeIndex === index}
-                className={`cifra min-h-11 flex-1 border px-3 ${
+                className={`numeric min-h-11 flex-1 border px-3 ${
                   rangeIndex === index
-                    ? 'border-tinta bg-tinta text-papel-alto'
-                    : 'border-linea bg-papel-alto'
+                    ? 'border-ink bg-ink text-sheet'
+                    : 'border-rule bg-sheet'
                 }`}
               >
                 {option.label}
@@ -142,9 +142,9 @@ export function RaffleForm({
 
       <div className="grid grid-cols-2 gap-3">
         <label className="flex flex-col gap-1">
-          <span className="rotulo">Juega con</span>
+          <span className="eyebrow">Juega con</span>
           <input
-            className="campo"
+            className="field"
             value={lottery}
             onChange={(event) => {
               setLottery(event.target.value);
@@ -153,9 +153,9 @@ export function RaffleForm({
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="rotulo">Fecha del sorteo</span>
+          <span className="eyebrow">Fecha del sorteo</span>
           <input
-            className="campo"
+            className="field"
             type="date"
             value={drawDate}
             onChange={(event) => {
@@ -166,14 +166,14 @@ export function RaffleForm({
       </div>
 
       <fieldset className="flex flex-col gap-2">
-        <legend className="rotulo">Premios</legend>
+        <legend className="eyebrow">Premios</legend>
         {prizes.map((prize, index) => (
           <div key={index} className="flex items-center gap-2">
-            <span className="cifra w-6 shrink-0 text-center text-sm text-tinta-suave">
+            <span className="numeric w-6 shrink-0 text-center text-sm text-ink-soft">
               {index + 1}
             </span>
             <input
-              className="campo"
+              className="field"
               value={prize}
               onChange={(event) => {
                 setPrizes(prizes.map((item, at) => (at === index ? event.target.value : item)));
@@ -183,7 +183,7 @@ export function RaffleForm({
             {prizes.length > 1 ? (
               <button
                 type="button"
-                className="min-h-11 px-2 text-tinta-suave"
+                className="min-h-11 px-2 text-ink-soft"
                 onClick={() => {
                   setPrizes(prizes.filter((_, at) => at !== index));
                 }}
@@ -204,19 +204,19 @@ export function RaffleForm({
           Añadir otro premio
         </button>
         {editing ? (
-          <p className="text-xs text-tinta-suave">
+          <p className="text-xs text-ink-soft">
             Al guardar se reemplaza la lista completa de premios.
           </p>
         ) : null}
       </fieldset>
 
       {error !== null && error !== undefined ? (
-        <p role="alert" className="border-l-2 border-sello pl-3 text-sm text-sello">
+        <p role="alert" className="border-l-2 border-stamp pl-3 text-sm text-stamp">
           No pudimos guardar la rifa. Revisa el nombre y el valor de la boleta.
         </p>
       ) : null}
 
-      <button type="submit" className="boton" disabled={busy}>
+      <button type="submit" className="btn" disabled={busy}>
         {busy ? 'Guardando…' : editing ? 'Guardar cambios' : 'Crear rifa'}
       </button>
     </form>

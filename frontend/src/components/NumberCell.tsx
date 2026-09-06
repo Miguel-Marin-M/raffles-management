@@ -44,16 +44,16 @@ export function NumberCell({
       className={[
         'relative aspect-square w-full select-none',
         'rounded-[2px] border transition-[background-color,border-color,transform] duration-150',
-        'font-display text-[length:var(--celda-cuerpo)] font-semibold tabular-nums',
+        'font-display text-[length:var(--cell-font-size)] font-semibold tabular-nums',
         'active:scale-[0.97]',
-        state === 'free' ? 'border-linea bg-papel-alto text-tinta' : '',
-        state === 'reserved' ? 'border-sello bg-sello/12 text-sello' : '',
-        state === 'paid' ? 'border-linea bg-transparent text-tinta-suave' : '',
-        selected ? 'border-tinta bg-tinta text-papel-alto' : '',
+        state === 'free' ? 'border-rule bg-sheet text-ink' : '',
+        state === 'reserved' ? 'border-stamp bg-stamp/12 text-stamp' : '',
+        state === 'paid' ? 'border-rule bg-transparent text-ink-soft' : '',
+        selected ? 'border-ink bg-ink text-sheet' : '',
       ]
         .filter(Boolean)
         .join(' ')}
-      style={{ fontStretch: 'var(--celda-ancho)' }}
+      style={{ fontStretch: 'var(--cell-font-stretch)' }}
     >
       {label}
 
@@ -67,11 +67,11 @@ export function NumberCell({
           <path
             d="M6 33 C 13 27, 19 20, 26 12 S 32 8, 34 6"
             fill="none"
-            stroke="var(--color-cancelado)"
+            stroke="var(--color-paid)"
             strokeWidth="2.4"
             strokeLinecap="round"
             pathLength={1}
-            className="[stroke-dasharray:1] [stroke-dashoffset:0] motion-safe:animate-[tachar_420ms_ease-out]"
+            className="[stroke-dasharray:1] [stroke-dashoffset:0] motion-safe:animate-[strike_420ms_ease-out]"
           />
         </svg>
       ) : null}
@@ -79,7 +79,7 @@ export function NumberCell({
       {state === 'reserved' ? (
         <span
           aria-hidden="true"
-          className="absolute right-0.5 top-0.5 h-1 w-1 rounded-full bg-sello sm:right-1 sm:top-1 sm:h-1.5 sm:w-1.5"
+          className="absolute right-0.5 top-0.5 h-1 w-1 rounded-full bg-stamp sm:right-1 sm:top-1 sm:h-1.5 sm:w-1.5"
         />
       ) : null}
     </button>

@@ -51,9 +51,9 @@ export function AddPhone({ customerId, onSaved }: AddPhoneProps): React.JSX.Elem
     <div className="flex flex-col gap-1">
       <div className="flex items-end gap-2">
         <label className="flex flex-1 flex-col gap-1">
-          <span className="rotulo">Teléfono</span>
+          <span className="eyebrow">Teléfono</span>
           <input
-            className="campo cifra"
+            className="field numeric"
             type="tel"
             inputMode="tel"
             value={phone}
@@ -66,7 +66,7 @@ export function AddPhone({ customerId, onSaved }: AddPhoneProps): React.JSX.Elem
         </label>
         <button
           type="button"
-          className="boton"
+          className="btn"
           disabled={phone.trim() === '' || save.isPending}
           onClick={() => {
             save.mutate();
@@ -77,14 +77,14 @@ export function AddPhone({ customerId, onSaved }: AddPhoneProps): React.JSX.Elem
       </div>
 
       {error !== null ? (
-        <p role="alert" className="text-sm text-sello">
+        <p role="alert" className="text-sm text-stamp">
           {error}
         </p>
       ) : null}
 
       <button
         type="button"
-        className="self-start text-xs text-tinta-suave underline underline-offset-4"
+        className="self-start text-xs text-ink-soft underline underline-offset-4"
         onClick={() => {
           setOpen(false);
           setError(null);
