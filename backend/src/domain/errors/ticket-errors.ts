@@ -82,3 +82,15 @@ export class TicketHasPaymentsError extends DomainError {
     super(`Numbers with payments already recorded: ${numbers.join(', ')}`);
   }
 }
+
+/**
+ * A paid ticket is settled: it cannot change hands or go back on the market,
+ * because either move would break the record of who paid for that number.
+ */
+export class PaidTicketIsFinalError extends DomainError {
+  readonly code = 'PAID_TICKET_IS_FINAL';
+
+  constructor(readonly ticketId: string) {
+    super(`Ticket ${ticketId} is paid and can no longer be reassigned or released`);
+  }
+}

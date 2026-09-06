@@ -2,7 +2,10 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import { Raffle } from '../../domain/entities/raffle.js';
 import { Ticket } from '../../domain/entities/ticket.js';
-import { TicketNotFoundError } from '../../domain/errors/ticket-errors.js';
+import {
+  PaidTicketIsFinalError,
+  TicketNotFoundError,
+} from '../../domain/errors/ticket-errors.js';
 import { Money } from '../../domain/value-objects/money.js';
 import { NumberRange } from '../../domain/value-objects/number-range.js';
 import { FixedClock } from '../../testing/fixed-clock.js';
@@ -93,6 +96,23 @@ describe('ReassignTicket', () => {
     const event = db.ticketEvents.at(-1);
     expect(event?.type).toBe('reassigned');
     expect(event?.payload).toMatchObject({ from: 'customer-original' });
+  });
+
+  it('refuses to hand over a ticket that is already paid', async () => {
+    await registerPayment.execute({
+      actorId: OWNER_ID,
+      ticketId: TICKET_ID,
+      amountMinorUnits: 10_000,
+    });
+
+    await expect(
+      reassignTicket.execute({
+        actorId: OWNER_ID,
+        ticketId: TICKET_ID,
+        customer: { name: 'Carlos Ruiz' },
+      }),
+    ).rejects.toThrow(PaidTicketIsFinalError);
+    expect(db.tickets.get(TICKET_ID)?.customerId).toBe('customer-original');
   });
 
   it('rejects an unknown ticket', async () => {
