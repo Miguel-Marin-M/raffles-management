@@ -45,6 +45,14 @@ PostgreSQL is published on port **5434** to avoid clashing with a host
 PostgreSQL install, Adminer is available at <http://localhost:8080> and the API
 documents itself at <http://localhost:3000/api/docs>.
 
+The panel is a PWA: `npm run build --workspace @rifas/web` emits a service
+worker that precaches the app shell so it opens without a connection. API
+requests are deliberately never cached — a board served from a stale cache
+would show numbers as free that somebody had already taken, which is the one
+mistake this system exists to prevent. The icons are drawn by
+`frontend/scripts/generate-icons.mjs`, so no image toolchain is needed to
+regenerate them.
+
 ## Tests
 
 ```bash
