@@ -1,21 +1,30 @@
 import { Customer } from '../../domain/entities/customer.js';
-import { CustomerNotFoundError } from '../../domain/errors/customer-errors.js';
+import {
+  CustomerNotFoundError,
+  DuplicateCustomerPhoneError,
+} from '../../domain/errors/customer-errors.js';
 import type { Clock } from '../../domain/ports/clock.js';
 import type { CustomerRepository } from '../../domain/ports/customer-repository.js';
 import type { IdGenerator } from '../../domain/ports/id-generator.js';
 import { PhoneNumber } from '../../domain/value-objects/phone-number.js';
 
-/** Either an existing customer or the data needed to register one on the spot. */
+/**
+ * Who the tickets are for.
+ *
+ * `id` picks somebody already on file, optionally renaming them, which is how
+ * two records are merged under one name. Anything else registers a new person.
+ */
 export type CustomerInput =
-  | { readonly id: string }
+  | { readonly id: string; readonly name?: string }
   | { readonly name: string; readonly phone?: string | null; readonly notes?: string | null };
 
 /**
  * Turns the customer half of a reservation into a stored customer.
  *
- * Extracted from the reservation use case because the board lets the organizer
- * pick an existing customer or type a new one in the same sheet, and other use
- * cases need the same behaviour.
+ * A phone already on file is never reused silently: the organizer typed a new
+ * name for a reason, and quietly filing the boletas under the old customer is
+ * how two different people end up sharing one record. The conflict is reported
+ * so the caller can ask whether to merge them.
  */
 export class CustomerResolver {
   constructor(
@@ -33,15 +42,22 @@ export class CustomerResolver {
       if (existing === null || existing.ownerId !== ownerId) {
         throw new CustomerNotFoundError(input.id);
       }
+
+      if (input.name !== undefined && input.name.trim() !== existing.name) {
+        existing.rename(input.name);
+        await customers.save(existing);
+      }
       return existing;
     }
 
-    // Reuse the record instead of creating a duplicate the organizer would
-    // then have to merge by hand.
     const phone = PhoneNumber.createOptional(input.phone);
     if (phone !== null) {
-      const existing = await customers.findByPhone(ownerId, phone.value);
-      if (existing !== null) return existing;
+      const owner = await customers.findByPhone(ownerId, phone.value);
+      if (owner !== null) {
+        // Same phone and same name is the same person taking more numbers.
+        if (isSamePerson(owner.name, input.name)) return owner;
+        throw new DuplicateCustomerPhoneError(phone.value, owner.id, owner.name);
+      }
     }
 
     const customer = Customer.create({
@@ -56,4 +72,10 @@ export class CustomerResolver {
     await customers.save(customer);
     return customer;
   }
+}
+
+function isSamePerson(storedName: string, typedName: string): boolean {
+  const normalize = (value: string): string =>
+    value.trim().replace(/\s+/g, ' ').toLocaleLowerCase('es');
+  return normalize(storedName) === normalize(typedName);
 }

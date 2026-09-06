@@ -36,7 +36,7 @@ export class UpdateCustomer {
       if (phone !== null) {
         const owner = await this.customers.findByPhone(command.actorId, phone.value);
         if (owner !== null && owner.id !== customer.id) {
-          throw new DuplicateCustomerPhoneError(phone.value);
+          throw new DuplicateCustomerPhoneError(phone.value, owner.id, owner.name);
         }
       }
       customer.changePhone(command.phone);

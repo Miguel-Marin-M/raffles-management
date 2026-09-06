@@ -8,11 +8,20 @@ export class CustomerNotFoundError extends DomainError {
   }
 }
 
-/** The organizer already has a customer registered with the same phone. */
+/**
+ * The organizer already has a customer registered with the same phone.
+ *
+ * Carries who owns it so the caller can offer to merge both records instead of
+ * making the organizer go looking for the duplicate.
+ */
 export class DuplicateCustomerPhoneError extends DomainError {
   readonly code = 'DUPLICATE_CUSTOMER_PHONE';
 
-  constructor(readonly phone: string) {
-    super(`A customer with phone ${phone} already exists`);
+  constructor(
+    readonly phone: string,
+    readonly customerId: string,
+    readonly customerName: string,
+  ) {
+    super(`Phone ${phone} already belongs to ${customerName}`);
   }
 }

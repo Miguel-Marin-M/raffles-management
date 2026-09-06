@@ -20,6 +20,7 @@ const STATUS_BY_CODE: Record<string, HttpStatus> = {
   RAFFLE_CLOSED: HttpStatus.CONFLICT,
   CLOSED_RAFFLE_IS_FINAL: HttpStatus.CONFLICT,
   RAFFLE_NOT_CLOSED: HttpStatus.CONFLICT,
+  MISSING_PRIZE_WINNERS: HttpStatus.CONFLICT,
   INVALID_PRIZE_LIST: HttpStatus.BAD_REQUEST,
   CUSTOMER_NOT_FOUND: HttpStatus.NOT_FOUND,
   DUPLICATE_CUSTOMER_PHONE: HttpStatus.CONFLICT,
@@ -47,9 +48,21 @@ export class DomainExceptionFilter implements ExceptionFilter<DomainError> {
     });
   }
 
-  /** Surfaces the numbers a conflict is about, which the board highlights. */
+  /**
+   * Surfaces what the client needs to act on the conflict: the numbers a board
+   * should highlight, or the customer a duplicate phone belongs to.
+   */
   private detailsOf(error: DomainError): Record<string, unknown> {
-    const numbers = (error as { numbers?: readonly number[] }).numbers;
-    return numbers === undefined ? {} : { numbers };
+    const { numbers, customerId, customerName } = error as {
+      numbers?: readonly number[];
+      customerId?: string;
+      customerName?: string;
+    };
+
+    return {
+      ...(numbers === undefined ? {} : { numbers }),
+      ...(customerId === undefined ? {} : { customerId }),
+      ...(customerName === undefined ? {} : { customerName }),
+    };
   }
 }
