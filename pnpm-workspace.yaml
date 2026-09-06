@@ -1,0 +1,10 @@
+packages:
+  - backend
+  - frontend
+
+# pnpm blocks install scripts by default. esbuild (Vite) and SWC (the API's dev
+# runner) need theirs to place their native binaries; scarf is only telemetry.
+allowBuilds:
+  '@swc/core': true
+  esbuild: true
+  '@scarf/scarf': false

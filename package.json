@@ -7,22 +7,20 @@
   "engines": {
     "node": ">=22"
   },
-  "workspaces": [
-    "backend",
-    "frontend"
-  ],
   "scripts": {
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
     "db:logs": "docker compose logs -f postgres",
-    "db:generate": "npm run db:generate --workspace @rifas/api",
-    "db:migrate": "npm run db:migrate --workspace @rifas/api",
-    "db:studio": "npm run db:studio --workspace @rifas/api",
-    "dev": "npm run dev --workspace @rifas/api",
-    "build": "npm run build --workspaces --if-present",
-    "test": "npm run test --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present",
-    "typecheck": "npm run typecheck --workspaces --if-present",
-    "dev:web": "npm run dev --workspace @rifas/web"
-  }
+    "db:generate": "pnpm --filter @rifas/api db:generate",
+    "db:migrate": "pnpm --filter @rifas/api db:migrate",
+    "db:studio": "pnpm --filter @rifas/api db:studio",
+    "dev": "pnpm --filter @rifas/api dev",
+    "dev:web": "pnpm --filter @rifas/web dev",
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "test:int": "pnpm --filter @rifas/api test:int",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "packageManager": "pnpm@11.10.0"
 }
