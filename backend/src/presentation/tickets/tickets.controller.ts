@@ -1,8 +1,18 @@
-import { Body, Controller, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { z } from 'zod';
 
 import { MarkTicketsAsPaid } from '../../application/tickets/mark-tickets-as-paid.js';
+import { ReassignTicket } from '../../application/tickets/reassign-ticket.js';
 import { RegisterPayment } from '../../application/tickets/register-payment.js';
 import { ReleaseTickets } from '../../application/tickets/release-tickets.js';
 import { ReserveTickets } from '../../application/tickets/reserve-tickets.js';
@@ -40,6 +50,8 @@ const releaseSchema = z.object({
   reason: z.string().nullish(),
 });
 
+const reassignSchema = z.object({ customer: customerSchema });
+
 const paymentSchema = z.object({
   amountMinorUnits: z.number().int().positive(),
   method: paymentMethodSchema.optional(),
@@ -55,6 +67,7 @@ export class TicketsController {
     private readonly markTicketsAsPaid: MarkTicketsAsPaid,
     private readonly releaseTickets: ReleaseTickets,
     private readonly registerPayment: RegisterPayment,
+    private readonly reassignTicket: ReassignTicket,
   ) {}
 
   @Post('raffles/:raffleId/tickets/reserve')
@@ -103,6 +116,20 @@ export class TicketsController {
       raffleId,
       numbers: body.numbers,
       reason: body.reason ?? null,
+    });
+  }
+
+  @Patch('tickets/:ticketId/customer')
+  @ApiOperation({ summary: 'Hand a reserved number over to another customer' })
+  reassign(
+    @CurrentUser() user: RequestUser,
+    @Param('ticketId') ticketId: string,
+    @Body(new ZodValidationPipe(reassignSchema)) body: z.infer<typeof reassignSchema>,
+  ) {
+    return this.reassignTicket.execute({
+      actorId: user.id,
+      ticketId,
+      customer: body.customer,
     });
   }
 
