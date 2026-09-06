@@ -24,7 +24,13 @@ async function bootstrap(): Promise<void> {
   await app.register(fastifyCookie);
   app.setGlobalPrefix(config.API_PREFIX);
   app.useGlobalFilters(new DomainExceptionFilter());
-  app.enableCors({ origin: config.CORS_ORIGIN, credentials: true });
+  app.enableCors({
+    origin: config.CORS_ORIGIN,
+    credentials: true,
+    // Fastify's CORS plugin only allows GET, HEAD and POST by default, which
+    // silently blocks every edit at the preflight.
+    methods: ['GET', 'HEAD', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+  });
   app.enableShutdownHooks();
 
   SwaggerModule.setup(
