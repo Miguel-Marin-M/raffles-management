@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 
 import { AuthenticateOrganizer } from '../../application/auth/authenticate-organizer.js';
+import { GetOrganizerProfile } from '../../application/auth/get-organizer-profile.js';
 import { RegisterOrganizer } from '../../application/auth/register-organizer.js';
 import { CLOCK } from '../../domain/ports/clock.js';
 import { ID_GENERATOR } from '../../domain/ports/id-generator.js';
@@ -30,6 +31,11 @@ import { TokenService } from './token.service.js';
         clock: Clock,
       ) => new RegisterOrganizer(users, hasher, idGenerator, clock),
       inject: [USER_REPOSITORY, PASSWORD_HASHER, ID_GENERATOR, CLOCK],
+    },
+    {
+      provide: GetOrganizerProfile,
+      useFactory: (users: UserRepository) => new GetOrganizerProfile(users),
+      inject: [USER_REPOSITORY],
     },
     {
       provide: AuthenticateOrganizer,

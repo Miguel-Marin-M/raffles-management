@@ -6,6 +6,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 
 import { AuthenticateOrganizer } from '../../application/auth/authenticate-organizer.js';
+import { GetOrganizerProfile } from '../../application/auth/get-organizer-profile.js';
 import { RegisterOrganizer } from '../../application/auth/register-organizer.js';
 import { ZodValidationPipe } from '../pipes/zod-validation.pipe.js';
 import { CurrentUser, type RequestUser } from './current-user.decorator.js';
@@ -31,6 +32,7 @@ export class AuthController {
   constructor(
     private readonly registerOrganizer: RegisterOrganizer,
     private readonly authenticateOrganizer: AuthenticateOrganizer,
+    private readonly getOrganizerProfile: GetOrganizerProfile,
     private readonly tokens: TokenService,
   ) {}
 
@@ -77,8 +79,8 @@ export class AuthController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Return the signed-in organizer' })
-  me(@CurrentUser() user: RequestUser): RequestUser {
-    return user;
+  me(@CurrentUser() user: RequestUser) {
+    return this.getOrganizerProfile.execute({ actorId: user.id });
   }
 
   /**
