@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { NumberGrid } from '../components/NumberGrid';
 import { Sheet } from '../components/Sheet';
 import { ApiError } from '../lib/api';
+import { describeError } from '../lib/errors';
 import { formatMoney } from '../lib/format';
 import { api, type BoardCell, type RaffleBoard, type RaffleStatus } from '../lib/rifas-api';
 import { CustomersPanel } from './CustomersPanel';
@@ -132,6 +133,10 @@ export function BoardScreen({ raffleId, onBack }: BoardScreenProps): React.JSX.E
   }
 
   const { raffle, summary } = board.data;
+  // Every write shares one message slot: only one of them runs at a time, and
+  // a failed edit used to look like nothing had happened at all.
+  const actionError =
+    updateRaffle.error ?? recordWinner.error ?? changeStatus.error ?? markAsPaid.error ?? release.error;
   const selectionTotal = selected.size * raffle.ticketPriceMinorUnits;
 
   return (
@@ -163,6 +168,12 @@ export function BoardScreen({ raffleId, onBack }: BoardScreenProps): React.JSX.E
           </button>
         ))}
       </nav>
+
+      {actionError != null ? (
+        <p role="alert" className="mb-4 border-l-2 border-sello pl-3 text-sm text-sello">
+          {describeError(actionError)}
+        </p>
+      ) : null}
 
       {conflict !== null ? (
         <p role="alert" className="mb-4 border-l-2 border-sello pl-3 text-sm text-sello">

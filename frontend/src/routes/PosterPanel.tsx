@@ -17,7 +17,7 @@ interface PosterProps {
  * the size a chat thumbnail gets they only add noise.
  */
 export function Poster({ board }: PosterProps): React.JSX.Element {
-  const { raffle, takenCells, summary } = board;
+  const { raffle, takenCells } = board;
 
   const taken = useMemo(
     () => new Set(takenCells.map((cell) => cell.number)),
@@ -107,13 +107,6 @@ export function Poster({ board }: PosterProps): React.JSX.Element {
       </div>
 
       <p className="mt-2 text-xs text-tinta-suave">Los números tachados ya están vendidos.</p>
-
-      <p
-        className="mt-6 font-display text-2xl font-extrabold leading-none"
-        style={{ fontStretch: '118%' }}
-      >
-        Quedan {summary.freeNumbers} de {summary.totalNumbers} boletas
-      </p>
 
       <p className="cifra mt-4 inline-block bg-loteria px-3 py-2 text-2xl font-semibold">
         {formatMoney(raffle.ticketPriceMinorUnits, raffle.currency)} cada boleta
