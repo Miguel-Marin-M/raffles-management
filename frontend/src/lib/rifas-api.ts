@@ -115,6 +115,11 @@ export const api = {
   searchCustomers: (term: string) =>
     request<Customer[]>(`/customers?q=${encodeURIComponent(term)}`),
 
+  updateCustomer: (
+    customerId: string,
+    input: { name?: string; phone?: string | null; notes?: string | null },
+  ) => request<Customer>(`/customers/${customerId}`, { method: 'PATCH', body: input }),
+
   listRaffles: () => request<Raffle[]>('/raffles'),
 
   createRaffle: (input: CreateRaffleInput) =>
