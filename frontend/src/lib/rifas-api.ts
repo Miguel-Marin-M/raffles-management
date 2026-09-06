@@ -9,6 +9,8 @@ export interface Prize {
   readonly position: number;
   readonly title: string;
   readonly description: string | null;
+  /** Number drawn for this prize; null until the raffle is played. */
+  readonly winningNumber: number | null;
 }
 
 export interface Raffle {
@@ -127,6 +129,12 @@ export const api = {
 
   updateRaffle: (raffleId: string, input: Partial<CreateRaffleInput>) =>
     request<Raffle>(`/raffles/${raffleId}`, { method: 'PATCH', body: input }),
+
+  recordWinner: (raffleId: string, prizeId: string, number: number | null) =>
+    request<{ raffle: Raffle; winnerCustomerId: string | null }>(
+      `/raffles/${raffleId}/prizes/${prizeId}/winner`,
+      { method: 'PATCH', body: { number } },
+    ),
 
   changeStatus: (raffleId: string, status: RaffleStatus) =>
     request<Raffle>(`/raffles/${raffleId}/status`, { method: 'PATCH', body: { status } }),
