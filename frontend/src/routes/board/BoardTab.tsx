@@ -2,12 +2,13 @@ import { useMutation } from '@tanstack/react-query';
 import { useParams } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
 
+import { MergeCustomerDialog, type PhoneConflict } from '../../components/MergeCustomerDialog';
 import { NumberGrid } from '../../components/NumberGrid';
 import { Sheet } from '../../components/Sheet';
 import { useBoard } from '../../features/board/use-board';
 import { ApiError } from '../../lib/api';
 import { formatMoney } from '../../lib/format';
-import { api } from '../../lib/rifas-api';
+import { api, type CustomerInput } from '../../lib/rifas-api';
 import { ReserveForm } from '../ReserveForm';
 
 /**
@@ -16,10 +17,11 @@ import { ReserveForm } from '../ReserveForm';
  */
 export function BoardTab(): React.JSX.Element {
   const { raffleId } = useParams({ from: '/raffles/$raffleId' });
-  const { board, reload, openCell } = useBoard();
+  const { board, reload, openCell, readOnly } = useBoard();
   const [selected, setSelected] = useState<ReadonlySet<number>>(new Set());
   const [reserving, setReserving] = useState(false);
   const [conflict, setConflict] = useState<readonly number[] | null>(null);
+  const [phoneConflict, setPhoneConflict] = useState<PhoneConflict | null>(null);
 
   const takenByNumber = useMemo(
     () => new Map(board.takenCells.map((cell) => [cell.number, cell])),
@@ -27,23 +29,43 @@ export function BoardTab(): React.JSX.Element {
   );
 
   const reserve = useMutation({
-    mutationFn: (input: Parameters<typeof api.reserve>[2]) =>
-      api.reserve(raffleId, [...selected], input),
+    mutationFn: (input: CustomerInput) => api.reserve(raffleId, [...selected], input),
     onSuccess: () => {
       setReserving(false);
+      setPhoneConflict(null);
       setSelected(new Set());
       reload();
     },
-    onError: (error: unknown) => {
-      if (error instanceof ApiError && error.body.numbers !== undefined) {
+    onError: (error: unknown, input: CustomerInput) => {
+      if (!(error instanceof ApiError)) return;
+
+      if (error.body.numbers !== undefined) {
         setConflict(error.body.numbers);
         setReserving(false);
         reload();
+        return;
+      }
+
+      // The phone is on file under another name: ask before merging them.
+      if (
+        error.body.code === 'DUPLICATE_CUSTOMER_PHONE' &&
+        error.body.customerId !== undefined &&
+        !('id' in input)
+      ) {
+        setPhoneConflict({
+          customerId: error.body.customerId,
+          customerName: error.body.customerName ?? 'otro cliente',
+          phone: input.phone ?? '',
+          typedName: input.name,
+        });
+        setReserving(false);
       }
     },
   });
 
   function toggle(value: number): void {
+    if (readOnly) return;
+
     const cell = takenByNumber.get(value);
     // Tapping a taken number opens it; only free numbers join a selection.
     if (cell !== undefined) {
@@ -82,6 +104,12 @@ export function BoardTab(): React.JSX.Element {
       />
 
       <Legend />
+
+      {readOnly ? (
+        <p className="mt-4 border-l-2 border-ink pl-3 text-sm text-ink-soft">
+          Esta rifa está cerrada. El tablero queda como registro de lo que se vendió.
+        </p>
+      ) : null}
 
       {selected.size > 0 ? (
         <div className="fixed inset-x-0 bottom-0 border-t border-ink bg-sheet px-4 py-3">
@@ -122,6 +150,7 @@ export function BoardTab(): React.JSX.Element {
         }}
       >
         <ReserveForm
+          raffleId={raffleId}
           numbers={[...selected].sort((a, b) => a - b)}
           digits={raffle.numberDigits}
           total={formatMoney(selectionTotal, raffle.currency)}
@@ -131,6 +160,17 @@ export function BoardTab(): React.JSX.Element {
           }}
         />
       </Sheet>
+
+      <MergeCustomerDialog
+        conflict={phoneConflict}
+        busy={reserve.isPending}
+        onCancel={() => {
+          setPhoneConflict(null);
+        }}
+        onConfirm={(pending) => {
+          reserve.mutate({ id: pending.customerId, name: pending.typedName });
+        }}
+      />
 
       <p className="sr-only" aria-live="polite">
         {summary.freeNumbers} números libres de {summary.totalNumbers}.

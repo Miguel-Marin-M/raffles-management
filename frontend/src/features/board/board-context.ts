@@ -1,5 +1,6 @@
 import { createContext } from 'react';
 
+import type { PhoneConflict } from '../../components/MergeCustomerDialog';
 import type { BoardCell, CustomerInput, RaffleBoard, RaffleStatus } from '../../lib/rifas-api';
 
 export interface BoardContextValue {
@@ -14,9 +15,15 @@ export interface BoardContextValue {
   markAsPaid: (numbers: readonly number[]) => void;
   release: (numbers: readonly number[]) => void;
   reassign: (numbers: readonly number[], customer: CustomerInput) => void;
-  recordWinner: (prizeId: string, number: number | null) => void;
+  registerPayment: (numbers: readonly number[], amountMinorUnits: number) => void;
+  /** Set when a typed phone turned out to belong to somebody already on file. */
+  readonly phoneConflict: PhoneConflict | null;
+  resolvePhoneConflict: (conflict: PhoneConflict | null) => void;
+  recordWinners: (winners: readonly { prizeId: string; number: number | null }[]) => void;
   changeStatus: (status: RaffleStatus) => void;
   editRaffle: () => void;
+  /** A closed raffle is a record: its sections only show what happened. */
+  readonly readOnly: boolean;
 }
 
 /**

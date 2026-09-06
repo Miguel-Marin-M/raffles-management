@@ -14,8 +14,9 @@ export function PosterTab(): React.JSX.Element {
   return (
     <section className="flex flex-col gap-3">
       <p className="text-sm text-ink-soft">
-        Así ven la rifa tus clientes. Ábrelo en pantalla completa y tómale una captura para
-        mandarlo por WhatsApp.
+        {board.raffle.status === 'closed'
+          ? 'Así quedó el afiche de la rifa, con sus ganadores.'
+          : 'Así ven la rifa tus clientes. Ábrelo en pantalla completa y tómale una captura para mandarlo por WhatsApp.'}
       </p>
 
       <div className="border border-rule">

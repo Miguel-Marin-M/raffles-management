@@ -2,8 +2,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, Outlet, useParams } from '@tanstack/react-router';
 import { useMemo, useState } from 'react';
 
+import type { PhoneConflict } from '../../components/MergeCustomerDialog';
 import { Sheet } from '../../components/Sheet';
 import { BoardContext, type BoardContextValue } from '../../features/board/board-context';
+import { ApiError } from '../../lib/api';
 import { describeError } from '../../lib/errors';
 import { formatMoney } from '../../lib/format';
 import {
@@ -35,6 +37,7 @@ export function RaffleLayout(): React.JSX.Element {
   const queryClient = useQueryClient();
   const [openCell, setOpenCell] = useState<BoardCell | null>(null);
   const [editing, setEditing] = useState(false);
+  const [phoneConflict, setPhoneConflict] = useState<PhoneConflict | null>(null);
 
   const board = useQuery({
     queryKey: ['board', raffleId],
@@ -71,13 +74,41 @@ export function RaffleLayout(): React.JSX.Element {
     }) => api.reassign(raffleId, numbers, customer),
     onSuccess: () => {
       setOpenCell(null);
+      setPhoneConflict(null);
       reload();
+    },
+    onError: (error: unknown, variables) => {
+      const { customer } = variables;
+      if (
+        error instanceof ApiError &&
+        error.body.code === 'DUPLICATE_CUSTOMER_PHONE' &&
+        error.body.customerId !== undefined &&
+        !('id' in customer)
+      ) {
+        setPhoneConflict({
+          customerId: error.body.customerId,
+          customerName: error.body.customerName ?? 'otro cliente',
+          phone: customer.phone ?? '',
+          typedName: customer.name,
+        });
+      }
     },
   });
 
-  const recordWinner = useMutation({
-    mutationFn: ({ prizeId, number }: { prizeId: string; number: number | null }) =>
-      api.recordWinner(raffleId, prizeId, number),
+  const registerPayment = useMutation({
+    mutationFn: ({
+      numbers,
+      amountMinorUnits,
+    }: {
+      numbers: readonly number[];
+      amountMinorUnits: number;
+    }) => api.registerPayment(raffleId, numbers, amountMinorUnits),
+    onSuccess: reload,
+  });
+
+  const recordWinners = useMutation({
+    mutationFn: (winners: readonly { prizeId: string; number: number | null }[]) =>
+      api.recordWinners(raffleId, winners),
     onSuccess: reload,
   });
 
@@ -100,7 +131,8 @@ export function RaffleLayout(): React.JSX.Element {
     markAsPaid.isPending ||
     release.isPending ||
     reassign.isPending ||
-    recordWinner.isPending ||
+    registerPayment.isPending ||
+    recordWinners.isPending ||
     changeStatus.isPending ||
     updateRaffle.isPending;
 
@@ -109,7 +141,8 @@ export function RaffleLayout(): React.JSX.Element {
     markAsPaid.error ??
     release.error ??
     reassign.error ??
-    recordWinner.error ??
+    registerPayment.error ??
+    recordWinners.error ??
     changeStatus.error ??
     null;
 
@@ -131,8 +164,13 @@ export function RaffleLayout(): React.JSX.Element {
       reassign: (numbers, customer) => {
         reassign.mutate({ numbers, customer });
       },
-      recordWinner: (prizeId, number) => {
-        recordWinner.mutate({ prizeId, number });
+      registerPayment: (numbers, amountMinorUnits) => {
+        registerPayment.mutate({ numbers, amountMinorUnits });
+      },
+      phoneConflict,
+      resolvePhoneConflict: setPhoneConflict,
+      recordWinners: (winners) => {
+        recordWinners.mutate(winners);
       },
       changeStatus: (status) => {
         changeStatus.mutate(status);
@@ -140,9 +178,10 @@ export function RaffleLayout(): React.JSX.Element {
       editRaffle: () => {
         setEditing(true);
       },
+      readOnly: board.data.raffle.status === 'closed',
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [board.data, busy, failure]);
+  }, [board.data, busy, failure, phoneConflict]);
 
   if (board.isPending) return <p className="px-4 py-10 text-ink-soft">Cargando tablero…</p>;
   if (value === null) {
@@ -183,7 +222,7 @@ export function RaffleLayout(): React.JSX.Element {
         <Outlet />
 
         <Sheet
-          open={openCell !== null}
+          open={openCell !== null && !value.readOnly}
           title={openCell === null ? '' : `Boleta ${openCell.label}`}
           onClose={() => {
             setOpenCell(null);
@@ -192,6 +231,7 @@ export function RaffleLayout(): React.JSX.Element {
           {openCell === null ? null : (
             <TicketDetail
               cell={openCell}
+              raffleId={raffleId}
               currency={raffle.currency}
               ticketPriceMinorUnits={raffle.ticketPriceMinorUnits}
               busy={busy}

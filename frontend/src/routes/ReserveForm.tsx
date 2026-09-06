@@ -4,6 +4,7 @@ import { CustomerPicker } from '../components/CustomerPicker';
 import type { CustomerInput } from '../lib/rifas-api';
 
 interface ReserveFormProps {
+  readonly raffleId: string;
   readonly numbers: readonly number[];
   readonly digits: number;
   readonly total: string;
@@ -13,6 +14,7 @@ interface ReserveFormProps {
 
 /** Who is taking the selected numbers. */
 export function ReserveForm({
+  raffleId,
   numbers,
   digits,
   total,
@@ -36,7 +38,7 @@ export function ReserveForm({
         <p className="numeric mt-1 text-sm text-ink-soft">Total {total}</p>
       </div>
 
-      <CustomerPicker onChange={setCustomer} autoFocus />
+      <CustomerPicker onChange={setCustomer} raffleId={raffleId} autoFocus />
 
       <button type="submit" className="btn" disabled={busy || customer === null}>
         {busy ? 'Apartando…' : 'Apartar boletas'}

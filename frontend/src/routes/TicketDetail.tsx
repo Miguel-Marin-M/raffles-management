@@ -10,6 +10,7 @@ import { api, type BoardCell, type CustomerInput } from '../lib/rifas-api';
 
 interface TicketDetailProps {
   readonly cell: BoardCell;
+  readonly raffleId: string;
   readonly currency: string;
   readonly ticketPriceMinorUnits: number;
   readonly busy: boolean;
@@ -28,6 +29,7 @@ interface TicketDetailProps {
  */
 export function TicketDetail({
   cell,
+  raffleId,
   currency,
   ticketPriceMinorUnits,
   busy,
@@ -43,7 +45,7 @@ export function TicketDetail({
   const [confirming, setConfirming] = useState(false);
 
   const registerPayment = useMutation({
-    mutationFn: (amount: number) => api.registerPayment(cell.ticketId, amount),
+    mutationFn: (amount: number) => api.registerPayment(raffleId, [cell.number], amount),
     onSuccess: () => {
       setPartial('');
       setError(null);
@@ -143,7 +145,7 @@ export function TicketDetail({
 
       {paid ? null : reassigning ? (
         <div className="flex flex-col gap-3 border-t border-rule pt-4">
-          <CustomerPicker onChange={setNewCustomer} autoFocus />
+          <CustomerPicker onChange={setNewCustomer} raffleId={raffleId} autoFocus />
           <div className="flex gap-2">
             <button
               type="button"

@@ -2,7 +2,7 @@ import { useBoard } from '../../features/board/use-board';
 import { SummaryPanel } from '../SummaryPanel';
 
 export function SummaryTab(): React.JSX.Element {
-  const { board, busy, changeStatus, recordWinner, editRaffle } = useBoard();
+  const { board, busy, changeStatus, recordWinners, editRaffle, readOnly } = useBoard();
 
   return (
     <SummaryPanel
@@ -10,7 +10,8 @@ export function SummaryTab(): React.JSX.Element {
       busy={busy}
       onChangeStatus={changeStatus}
       onEdit={editRaffle}
-      onRecordWinner={recordWinner}
+      onRecordWinners={recordWinners}
+      readOnly={readOnly}
     />
   );
 }
