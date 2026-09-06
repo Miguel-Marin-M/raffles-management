@@ -196,8 +196,47 @@ export class Raffle {
     }
   }
 
+  /**
+   * Replaces the prize list, carrying winners over by position.
+   *
+   * Editing the list rebuilds every prize, so without this a raffle that has
+   * already been drawn would silently lose which number won each prize.
+   */
   replacePrizes(prizes: readonly Prize[]): void {
-    this.currentPrizes = Raffle.validatePrizes(prizes);
+    const winners = new Map(
+      this.currentPrizes
+        .filter((prize) => prize.winningNumber !== null)
+        .map((prize) => [prize.position, prize.winningNumber]),
+    );
+
+    const next = Raffle.validatePrizes(prizes);
+    for (const prize of next) {
+      const winner = winners.get(prize.position);
+      if (prize.winningNumber === null && winner !== undefined) prize.recordWinner(winner);
+    }
+
+    this.currentPrizes = next;
+  }
+
+  /**
+   * Writes down the number that won a prize, or clears it when the draw has to
+   * be corrected. The number must belong to the raffle, but it need not be
+   * sold: an unsold number can win.
+   */
+  recordWinner(prizeId: string, number: number | null): Prize {
+    const prize = this.currentPrizes.find((candidate) => candidate.id === prizeId);
+    if (prize === undefined) throw new PrizeListError(`Prize ${prizeId} is not part of this raffle`);
+
+    if (number !== null && !this.currentRange.contains(number)) {
+      throw new TicketNumbersOutOfRangeError(
+        [number],
+        this.currentRange.min,
+        this.currentRange.max,
+      );
+    }
+
+    prize.recordWinner(number);
+    return prize;
   }
 
   /**

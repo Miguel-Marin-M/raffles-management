@@ -25,6 +25,7 @@ function toRaffle(row: RaffleRow, prizeRows: readonly PrizeRow[]): Raffle {
       position: prize.position,
       title: prize.title,
       description: prize.description,
+      winningNumber: prize.winningNumber,
     })),
     createdAt: row.createdAt,
   });
@@ -90,6 +91,7 @@ export class DrizzleRaffleRepository implements RaffleRepository {
           position: prize.position,
           title: prize.title,
           description: prize.description,
+          winningNumber: prize.winningNumber,
         })),
       );
     }

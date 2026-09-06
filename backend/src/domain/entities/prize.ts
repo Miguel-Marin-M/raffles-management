@@ -5,6 +5,8 @@ export interface PrizeSnapshot {
   readonly position: number;
   readonly title: string;
   readonly description: string | null;
+  /** Number drawn for this prize; null until the raffle is played. */
+  readonly winningNumber: number | null;
 }
 
 /**
@@ -17,6 +19,7 @@ export class Prize {
     readonly position: number,
     readonly title: string,
     readonly description: string | null,
+    private currentWinningNumber: number | null,
   ) {}
 
   static create(input: {
@@ -24,6 +27,7 @@ export class Prize {
     position: number;
     title: string;
     description?: string | null;
+    winningNumber?: number | null;
   }): Prize {
     const title = input.title.trim();
     if (title === '') throw new ValidationError('Prize title cannot be empty');
@@ -32,11 +36,32 @@ export class Prize {
     }
 
     const description = input.description?.trim();
-    return new Prize(input.id, input.position, title, description === '' || description === undefined ? null : description);
+    return new Prize(
+      input.id,
+      input.position,
+      title,
+      description === '' || description === undefined ? null : description,
+      input.winningNumber ?? null,
+    );
   }
 
   static restore(snapshot: PrizeSnapshot): Prize {
-    return new Prize(snapshot.id, snapshot.position, snapshot.title, snapshot.description);
+    return new Prize(
+      snapshot.id,
+      snapshot.position,
+      snapshot.title,
+      snapshot.description,
+      snapshot.winningNumber,
+    );
+  }
+
+  get winningNumber(): number | null {
+    return this.currentWinningNumber;
+  }
+
+  /** Range validation belongs to the raffle, which owns the numbers. */
+  recordWinner(number: number | null): void {
+    this.currentWinningNumber = number;
   }
 
   toSnapshot(): PrizeSnapshot {
@@ -45,6 +70,7 @@ export class Prize {
       position: this.position,
       title: this.title,
       description: this.description,
+      winningNumber: this.currentWinningNumber,
     };
   }
 }
