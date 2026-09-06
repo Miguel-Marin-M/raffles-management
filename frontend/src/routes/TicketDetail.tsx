@@ -15,6 +15,7 @@ interface TicketDetailProps {
   readonly busy: boolean;
   readonly onMarkAsPaid: () => void;
   readonly onRelease: () => void;
+  readonly onReassign: (customer: CustomerInput) => void;
   readonly onChanged: () => void;
 }
 
@@ -32,6 +33,7 @@ export function TicketDetail({
   busy,
   onMarkAsPaid,
   onRelease,
+  onReassign,
   onChanged,
 }: TicketDetailProps): React.JSX.Element {
   const [partial, setPartial] = useState('');
@@ -47,14 +49,6 @@ export function TicketDetail({
       setError(null);
       onChanged();
     },
-    onError: (cause: unknown) => {
-      setError(describeError(cause));
-    },
-  });
-
-  const reassign = useMutation({
-    mutationFn: (customer: CustomerInput) => api.reassign(cell.ticketId, customer),
-    onSuccess: onChanged,
     onError: (cause: unknown) => {
       setError(describeError(cause));
     },
@@ -154,9 +148,9 @@ export function TicketDetail({
             <button
               type="button"
               className="btn flex-1"
-              disabled={newCustomer === null || reassign.isPending}
+              disabled={newCustomer === null || busy}
               onClick={() => {
-                if (newCustomer !== null) reassign.mutate(newCustomer);
+                if (newCustomer !== null) onReassign(newCustomer);
               }}
             >
               Pasar la boleta

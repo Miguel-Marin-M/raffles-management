@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 
-import type { BoardCell, RaffleBoard, RaffleStatus } from '../../lib/rifas-api';
+import type { BoardCell, CustomerInput, RaffleBoard, RaffleStatus } from '../../lib/rifas-api';
 
 export interface BoardContextValue {
   readonly board: RaffleBoard;
@@ -13,6 +13,7 @@ export interface BoardContextValue {
   openCell: (cell: BoardCell) => void;
   markAsPaid: (numbers: readonly number[]) => void;
   release: (numbers: readonly number[]) => void;
+  reassign: (numbers: readonly number[], customer: CustomerInput) => void;
   recordWinner: (prizeId: string, number: number | null) => void;
   changeStatus: (status: RaffleStatus) => void;
   editRaffle: () => void;

@@ -159,10 +159,10 @@ export const api = {
       body: { numbers },
     }),
 
-  reassign: (ticketId: string, customer: CustomerInput) =>
-    request<{ ticketId: string; number: number; customerId: string }>(
-      `/tickets/${ticketId}/customer`,
-      { method: 'PATCH', body: { customer } },
+  reassign: (raffleId: string, numbers: readonly number[], customer: CustomerInput) =>
+    request<{ customerId: string; numbers: number[] }>(
+      `/raffles/${raffleId}/tickets/reassign`,
+      { method: 'POST', body: { numbers, customer } },
     ),
 
   registerPayment: (ticketId: string, amountMinorUnits: number, method?: PaymentMethod) =>

@@ -6,7 +6,13 @@ import { Sheet } from '../../components/Sheet';
 import { BoardContext, type BoardContextValue } from '../../features/board/board-context';
 import { describeError } from '../../lib/errors';
 import { formatMoney } from '../../lib/format';
-import { api, type BoardCell, type RaffleBoard, type RaffleStatus } from '../../lib/rifas-api';
+import {
+  api,
+  type BoardCell,
+  type CustomerInput,
+  type RaffleBoard,
+  type RaffleStatus,
+} from '../../lib/rifas-api';
 import { RaffleForm } from '../RaffleForm';
 import { TicketDetail } from '../TicketDetail';
 
@@ -55,6 +61,20 @@ export function RaffleLayout(): React.JSX.Element {
     },
   });
 
+  const reassign = useMutation({
+    mutationFn: ({
+      numbers,
+      customer,
+    }: {
+      numbers: readonly number[];
+      customer: CustomerInput;
+    }) => api.reassign(raffleId, numbers, customer),
+    onSuccess: () => {
+      setOpenCell(null);
+      reload();
+    },
+  });
+
   const recordWinner = useMutation({
     mutationFn: ({ prizeId, number }: { prizeId: string; number: number | null }) =>
       api.recordWinner(raffleId, prizeId, number),
@@ -79,13 +99,19 @@ export function RaffleLayout(): React.JSX.Element {
   const busy =
     markAsPaid.isPending ||
     release.isPending ||
+    reassign.isPending ||
     recordWinner.isPending ||
     changeStatus.isPending ||
     updateRaffle.isPending;
 
   // Only one write runs at a time, so they share a single message slot.
   const failure =
-    markAsPaid.error ?? release.error ?? recordWinner.error ?? changeStatus.error ?? null;
+    markAsPaid.error ??
+    release.error ??
+    reassign.error ??
+    recordWinner.error ??
+    changeStatus.error ??
+    null;
 
   const value = useMemo<BoardContextValue | null>(() => {
     if (board.data === undefined) return null;
@@ -101,6 +127,9 @@ export function RaffleLayout(): React.JSX.Element {
       },
       release: (numbers) => {
         release.mutate(numbers);
+      },
+      reassign: (numbers, customer) => {
+        reassign.mutate({ numbers, customer });
       },
       recordWinner: (prizeId, number) => {
         recordWinner.mutate({ prizeId, number });
@@ -171,6 +200,9 @@ export function RaffleLayout(): React.JSX.Element {
               }}
               onRelease={() => {
                 release.mutate([openCell.number]);
+              }}
+              onReassign={(customer) => {
+                reassign.mutate({ numbers: [openCell.number], customer });
               }}
               onChanged={() => {
                 setOpenCell(null);

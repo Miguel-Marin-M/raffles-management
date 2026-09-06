@@ -2,7 +2,7 @@ import { useBoard } from '../../features/board/use-board';
 import { CustomersPanel } from '../CustomersPanel';
 
 export function CustomersTab(): React.JSX.Element {
-  const { board, busy, openCell, markAsPaid, reload } = useBoard();
+  const { board, busy, openCell, markAsPaid, release, reassign, reload } = useBoard();
 
   return (
     <CustomersPanel
@@ -11,6 +11,8 @@ export function CustomersTab(): React.JSX.Element {
       busy={busy}
       onOpenCell={openCell}
       onMarkAsPaid={markAsPaid}
+      onRelease={release}
+      onReassign={reassign}
       onCustomerChanged={reload}
     />
   );
