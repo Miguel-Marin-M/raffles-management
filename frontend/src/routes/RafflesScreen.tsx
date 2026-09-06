@@ -22,6 +22,9 @@ export function RafflesScreen(): React.JSX.Element {
   const [creating, setCreating] = useState(false);
 
   const raffles = useQuery({ queryKey: ['raffles'], queryFn: api.listRaffles });
+  // Closed raffles live in the history so this list stays about what is on sale.
+  const live = (raffles.data ?? []).filter((raffle) => raffle.status !== 'closed');
+  const closedCount = (raffles.data ?? []).length - live.length;
 
   const createRaffle = useMutation({
     mutationFn: api.createRaffle,
@@ -52,7 +55,7 @@ export function RafflesScreen(): React.JSX.Element {
 
       {raffles.isPending ? <p className="mt-8 text-ink-soft">Cargando…</p> : null}
 
-      {raffles.data?.length === 0 ? (
+      {!raffles.isPending && live.length === 0 ? (
         <div className="mt-10 border border-dashed border-rule px-5 py-10 text-center">
           <p className="font-display text-lg">Todavía no tienes rifas.</p>
           <p className="mt-1 text-ink-soft">
@@ -62,7 +65,7 @@ export function RafflesScreen(): React.JSX.Element {
       ) : null}
 
       <ul className="mt-6 flex flex-col gap-3">
-        {raffles.data?.map((raffle) => (
+        {live.map((raffle) => (
           <li key={raffle.id}>
             <Link
               to="/raffles/$raffleId/board"
@@ -87,6 +90,12 @@ export function RafflesScreen(): React.JSX.Element {
           </li>
         ))}
       </ul>
+
+      {closedCount > 0 ? (
+        <Link to="/raffles/history" className="mt-6 inline-block underline underline-offset-4">
+          Ver el historial ({closedCount} {closedCount === 1 ? 'rifa cerrada' : 'rifas cerradas'})
+        </Link>
+      ) : null}
 
       <div className="fixed inset-x-0 bottom-0 border-t border-rule bg-paper/95 px-4 py-3 backdrop-blur">
         <div className="mx-auto max-w-2xl">

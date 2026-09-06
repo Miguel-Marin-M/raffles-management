@@ -1,5 +1,6 @@
 import { createRootRoute, createRoute, createRouter, redirect } from '@tanstack/react-router';
 
+import { HistoryScreen } from './routes/HistoryScreen';
 import { RafflesScreen } from './routes/RafflesScreen';
 import { BoardTab } from './routes/board/BoardTab';
 import { CustomersTab } from './routes/board/CustomersTab';
@@ -22,6 +23,12 @@ const rafflesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/raffles',
   component: RafflesScreen,
+});
+
+const historyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/raffles/history',
+  component: HistoryScreen,
 });
 
 const raffleRoute = createRoute({
@@ -66,6 +73,7 @@ const summaryRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   homeRoute,
   rafflesRoute,
+  historyRoute,
   raffleRoute.addChildren([
     raffleIndexRoute,
     boardRoute,
