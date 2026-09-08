@@ -6,6 +6,7 @@ import { CustomerPicker } from '../components/CustomerPicker';
 import { MergeCustomerDialog, type PhoneConflict } from '../components/MergeCustomerDialog';
 import { Sheet } from '../components/Sheet';
 import { formatMoney } from '../lib/format';
+import { matchesNameOrPhone } from '../lib/search';
 import type { BoardCell, CustomerInput, Raffle } from '../lib/raffles-api';
 
 interface CustomersPanelProps {
@@ -22,6 +23,9 @@ interface CustomersPanelProps {
   readonly onResolveConflict: (conflict: PhoneConflict | null) => void;
   readonly readOnly: boolean;
 }
+
+/** Enough rows to scan on a phone without turning the page constantly. */
+const PAGE_SIZE = 10;
 
 interface CustomerRow {
   readonly id: string;
@@ -67,6 +71,8 @@ export function CustomersPanel({
   const [paying, setPaying] = useState(false);
   const [amount, setAmount] = useState('');
   const [newCustomer, setNewCustomer] = useState<CustomerInput | null>(null);
+  const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
 
   const rows = useMemo(() => {
     const grouped = new Map<string, CustomerRow>();
@@ -93,6 +99,18 @@ export function CustomersPanel({
       (a, b) => b.owed - a.owed || a.name.localeCompare(b.name, 'es'),
     );
   }, [takenCells]);
+
+  const matching = useMemo(
+    () => rows.filter((row) => matchesNameOrPhone(query, row.name, row.phone)),
+    [rows, query],
+  );
+
+  // Clamped instead of reset through an effect: filtering down to fewer pages
+  // should not leave the list showing nothing until a render later.
+  const pageCount = Math.max(1, Math.ceil(matching.length / PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount);
+  const firstOnPage = (currentPage - 1) * PAGE_SIZE;
+  const visible = matching.slice(firstOnPage, firstOnPage + PAGE_SIZE);
 
   const activeRow = rows.find((row) => row.id === selection?.customerId) ?? null;
   const selectedNumbers = selection?.numbers ?? [];
@@ -149,86 +167,162 @@ export function CustomersPanel({
           : 'Toca los números apartados para escoger sobre cuáles quieres actuar.'}
       </p>
 
-      <ul className="flex flex-col gap-3 pb-28">
-        {rows.map((row) => {
-          const pending = row.cells.filter((cell) => cell.status !== 'paid');
-          const isActive = selection?.customerId === row.id;
+      <label className="mb-2 flex flex-col gap-1">
+        <span className="eyebrow">Buscar</span>
+        <div className="flex items-center gap-2">
+          <input
+            className="field"
+            type="search"
+            value={query}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setPage(1);
+            }}
+            placeholder="Nombre o teléfono del cliente"
+          />
+          {query === '' ? null : (
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => {
+                setQuery('');
+                setPage(1);
+              }}
+            >
+              Limpiar
+            </button>
+          )}
+        </div>
+      </label>
 
-          return (
-            <li key={row.id} className="border border-rule bg-sheet px-4 py-3">
-              <div className="flex items-baseline justify-between gap-3">
-                <h3 className="text-lg leading-tight">{row.name}</h3>
-                <span
-                  className={`numeric shrink-0 text-sm ${
-                    row.owed === 0 ? 'text-paid' : 'text-stamp'
-                  }`}
-                >
-                  {row.owed === 0 ? 'al día' : `debe ${formatMoney(row.owed, raffle.currency)}`}
-                </span>
-              </div>
+      <p className="mb-3 text-xs text-ink-soft">
+        {matching.length === rows.length
+          ? `${rows.length} ${rows.length === 1 ? 'cliente' : 'clientes'}`
+          : `${matching.length} de ${rows.length} clientes`}
+        {matching.length > PAGE_SIZE
+          ? ` · mostrando ${firstOnPage + 1}–${firstOnPage + visible.length}`
+          : ''}
+      </p>
 
-              <div className="mt-2 flex flex-wrap items-center gap-1">
-                {row.cells.map((cell) => {
-                  const selected = isActive && selectedNumbers.includes(cell.number);
+      {matching.length === 0 ? (
+        <div className="border border-dashed border-rule px-5 py-8 text-center">
+          <p className="font-display text-lg">Ningún cliente coincide.</p>
+          <p className="mt-1 text-ink-soft">
+            Prueba con parte del nombre o con los últimos dígitos del teléfono.
+          </p>
+        </div>
+      ) : null}
 
-                  return (
-                    <button
-                      key={cell.ticketId}
-                      type="button"
-                      aria-pressed={cell.status === 'paid' ? undefined : selected}
-                      onClick={() => {
-                        toggle(row, cell);
-                      }}
-                      className={`numeric min-h-9 border px-2 py-0.5 text-sm ${
-                        cell.status === 'paid'
-                          ? 'border-rule text-ink-soft line-through decoration-paid decoration-2'
-                          : selected
-                            ? 'border-ink bg-ink text-sheet'
-                            : 'border-stamp text-stamp'
-                      }`}
-                    >
-                      {cell.label}
-                    </button>
-                  );
-                })}
+      <div className="pb-28">
+        <ul className="flex flex-col gap-3">
+          {visible.map((row) => {
+            const pending = row.cells.filter((cell) => cell.status !== 'paid');
+            const isActive = selection?.customerId === row.id;
 
-                {pending.length > 1 && !readOnly ? (
-                  <button
-                    type="button"
-                    className="min-h-9 px-2 text-xs underline underline-offset-4"
-                    onClick={() => {
-                      setSelection({
-                        customerId: row.id,
-                        numbers: pending.map((cell) => cell.number).sort((a, b) => a - b),
-                      });
-                    }}
+            return (
+              <li key={row.id} className="border border-rule bg-sheet px-4 py-3">
+                <div className="flex items-baseline justify-between gap-3">
+                  <h3 className="text-lg leading-tight">{row.name}</h3>
+                  <span
+                    className={`numeric shrink-0 text-sm ${
+                      row.owed === 0 ? 'text-paid' : 'text-stamp'
+                    }`}
                   >
-                    Todas
-                  </button>
-                ) : null}
-              </div>
-
-              <div className="mt-2 text-xs text-ink-soft">
-                <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
-                  <span className="numeric">
-                    {row.cells.length} {row.cells.length === 1 ? 'boleta' : 'boletas'} · abonado{' '}
-                    {formatMoney(row.paid, raffle.currency)}
+                    {row.owed === 0 ? 'al día' : `debe ${formatMoney(row.owed, raffle.currency)}`}
                   </span>
                 </div>
-                {row.phone === null ? (
-                  readOnly ? null : (
-                    <AddPhone customerId={row.id} onSaved={onCustomerChanged} />
-                  )
-                ) : (
-                  <a className="numeric underline underline-offset-4" href={`tel:${row.phone}`}>
-                    {row.phone}
-                  </a>
-                )}
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+
+                <div className="mt-2 flex flex-wrap items-center gap-1">
+                  {row.cells.map((cell) => {
+                    const selected = isActive && selectedNumbers.includes(cell.number);
+
+                    return (
+                      <button
+                        key={cell.ticketId}
+                        type="button"
+                        aria-pressed={cell.status === 'paid' ? undefined : selected}
+                        onClick={() => {
+                          toggle(row, cell);
+                        }}
+                        className={`numeric min-h-9 border px-2 py-0.5 text-sm ${
+                          cell.status === 'paid'
+                            ? 'border-rule text-ink-soft line-through decoration-paid decoration-2'
+                            : selected
+                              ? 'border-ink bg-ink text-sheet'
+                              : 'border-stamp text-stamp'
+                        }`}
+                      >
+                        {cell.label}
+                      </button>
+                    );
+                  })}
+
+                  {pending.length > 1 && !readOnly ? (
+                    <button
+                      type="button"
+                      className="min-h-9 px-2 text-xs underline underline-offset-4"
+                      onClick={() => {
+                        setSelection({
+                          customerId: row.id,
+                          numbers: pending.map((cell) => cell.number).sort((a, b) => a - b),
+                        });
+                      }}
+                    >
+                      Todas
+                    </button>
+                  ) : null}
+                </div>
+
+                <div className="mt-2 text-xs text-ink-soft">
+                  <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="numeric">
+                      {row.cells.length} {row.cells.length === 1 ? 'boleta' : 'boletas'} · abonado{' '}
+                      {formatMoney(row.paid, raffle.currency)}
+                    </span>
+                  </div>
+                  {row.phone === null ? (
+                    readOnly ? null : (
+                      <AddPhone customerId={row.id} onSaved={onCustomerChanged} />
+                    )
+                  ) : (
+                    <a className="numeric underline underline-offset-4" href={`tel:${row.phone}`}>
+                      {row.phone}
+                    </a>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+
+        {pageCount > 1 ? (
+          <nav className="mt-4 flex items-center justify-between gap-3" aria-label="Páginas">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              disabled={currentPage === 1}
+              onClick={() => {
+                setPage(currentPage - 1);
+              }}
+            >
+              ← Anterior
+            </button>
+            <span className="numeric text-sm text-ink-soft">
+              {currentPage} de {pageCount}
+            </span>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              disabled={currentPage === pageCount}
+              onClick={() => {
+                setPage(currentPage + 1);
+              }}
+            >
+              Siguiente →
+            </button>
+          </nav>
+        ) : null}
+      </div>
 
       {activeRow !== null && selectedCells.length > 0 ? (
         <div className="fixed inset-x-0 bottom-0 border-t border-ink bg-sheet px-4 py-3">
