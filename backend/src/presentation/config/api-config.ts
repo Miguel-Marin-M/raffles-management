@@ -5,6 +5,10 @@ const schema = z.object({
   API_PORT: z.coerce.number().int().positive().default(3000),
   API_PREFIX: z.string().default('api'),
   CORS_ORIGIN: z.string().default('http://localhost:5173'),
+  // Browsers drop a cross-site cookie unless it is marked SameSite=None, which
+  // is what the refresh cookie needs when the panel and the API live on two
+  // different registrable domains. Serving both from one domain keeps 'lax'.
+  COOKIE_SAMESITE: z.enum(['lax', 'none']).default('lax'),
   JWT_ACCESS_SECRET: z.string().min(16),
   JWT_ACCESS_TTL: z.string().default('15m'),
   JWT_REFRESH_SECRET: z.string().min(16),

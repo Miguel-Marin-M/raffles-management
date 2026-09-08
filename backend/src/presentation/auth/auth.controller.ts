@@ -1,13 +1,26 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Inject,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 // Side-effect import: augments FastifyRequest/FastifyReply with the cookie API.
 import '@fastify/cookie';
+import type { CookieSerializeOptions } from '@fastify/cookie';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 
 import { AuthenticateOrganizer } from '../../application/auth/authenticate-organizer.js';
 import { GetOrganizerProfile } from '../../application/auth/get-organizer-profile.js';
 import { RegisterOrganizer } from '../../application/auth/register-organizer.js';
+import { API_CONFIG, type ApiConfig } from '../config/api-config.js';
 import { ZodValidationPipe } from '../pipes/zod-validation.pipe.js';
 import { CurrentUser, type RequestUser } from './current-user.decorator.js';
 import { JwtAuthGuard } from './jwt-auth.guard.js';
@@ -34,6 +47,7 @@ export class AuthController {
     private readonly authenticateOrganizer: AuthenticateOrganizer,
     private readonly getOrganizerProfile: GetOrganizerProfile,
     private readonly tokens: TokenService,
+    @Inject(API_CONFIG) private readonly config: ApiConfig,
   ) {}
 
   @Post('register')
@@ -73,7 +87,7 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Clear the session cookie' })
   logout(@Res({ passthrough: true }) reply: FastifyReply): void {
-    void reply.clearCookie(REFRESH_COOKIE, { path: '/' });
+    void reply.clearCookie(REFRESH_COOKIE, this.refreshCookieOptions());
   }
 
   @Get('me')
@@ -94,13 +108,24 @@ export class AuthController {
   ) {
     const { accessToken, refreshToken } = await this.tokens.issue(user);
 
-    void reply.setCookie(REFRESH_COOKIE, refreshToken, {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env['NODE_ENV'] === 'production',
-      path: '/',
-    });
+    void reply.setCookie(REFRESH_COOKIE, refreshToken, this.refreshCookieOptions());
 
     return { accessToken, user: { id: user.id, email: user.email, name: user.name ?? null } };
+  }
+
+  /**
+   * A split deployment puts the panel and the API on unrelated domains, where
+   * the cookie only survives as SameSite=None. Browsers reject that without
+   * Secure, so the flag follows the policy instead of the environment.
+   */
+  private refreshCookieOptions(): CookieSerializeOptions {
+    const sameSite = this.config.COOKIE_SAMESITE;
+
+    return {
+      httpOnly: true,
+      sameSite,
+      secure: sameSite === 'none' || this.config.NODE_ENV === 'production',
+      path: '/',
+    };
   }
 }
