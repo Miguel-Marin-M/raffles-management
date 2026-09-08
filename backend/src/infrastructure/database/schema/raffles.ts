@@ -42,6 +42,15 @@ export const raffles = pgTable(
     /** Lottery draw the winning number is taken from. */
     lotteryReference: text('lottery_reference'),
 
+    /**
+     * Contact details printed on the poster. Optional, and kept per raffle
+     * rather than on the account because an organizer may run a raffle on
+     * behalf of someone else or collect it in a different account.
+     */
+    organizerName: text('organizer_name'),
+    bankName: text('bank_name'),
+    bankAccount: text('bank_account'),
+
     status: raffleStatusEnum('status').notNull().default('draft'),
 
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
