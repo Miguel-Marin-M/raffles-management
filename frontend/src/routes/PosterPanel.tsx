@@ -49,7 +49,7 @@ export function Poster({ board }: PosterProps): React.JSX.Element {
   return (
     <article className="mx-auto w-full max-w-[26rem] bg-sheet px-5 py-7">
       <h2
-        className="text-[2.75rem] font-extrabold leading-[0.92] tracking-tight"
+        className="text-[1.75rem] font-extrabold leading-[0.92] tracking-tight"
         style={{ fontStretch: '125%' }}
       >
         {raffle.name}
@@ -57,14 +57,14 @@ export function Poster({ board }: PosterProps): React.JSX.Element {
 
       {drawDate === null ? null : (
         <p
-          className="mt-4 inline-block bg-lottery px-3 py-1.5 font-display text-sm font-semibold uppercase tracking-[0.12em]"
+          className="mt-2 inline-block bg-lottery px-3 py-1.5 font-display text-sm font-semibold uppercase tracking-[0.12em]"
         >
           Juega el {drawDate}
         </p>
       )}
 
       {raffle.prizes.length > 0 ? (
-        <ol className="mt-6">
+        <ol className="mt-4">
           {raffle.prizes.map((prize) => (
             <li
               key={prize.id}
@@ -73,7 +73,7 @@ export function Poster({ board }: PosterProps): React.JSX.Element {
               <span className="numeric w-5 shrink-0 text-sm text-ink-soft">{prize.position}</span>
               <div className="flex flex-1 flex-col items-start">
                 <span
-                  className="font-display text-lg font-semibold leading-tight"
+                  className="font-display text-lg font-semibold leading-tight text-[1rem]"
                   style={{ fontStretch: '108%' }}
                 >
                   {prize.title}
@@ -97,7 +97,7 @@ export function Poster({ board }: PosterProps): React.JSX.Element {
       ) : null}
 
       {raffle.organizerName === null && payTo === null ? null : (
-        <div className="mt-6 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-xs text-ink-soft">
+        <div className="mt-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-xs text-ink-soft">
           {raffle.organizerName === null ? null : (
             <p>
               <span className="font-bold">Responsable:</span> {raffle.organizerName}
@@ -111,7 +111,7 @@ export function Poster({ board }: PosterProps): React.JSX.Element {
           )}
         </div>
       )}
-      <div className="mt-7 grid grid-cols-10 gap-x-1 gap-y-1.5">
+      <div className="mt-4 grid grid-cols-10 gap-x-1 gap-y-1.5">
         {numbers.map((value) => {
           const sold = taken.has(value);
 
@@ -134,8 +134,8 @@ export function Poster({ board }: PosterProps): React.JSX.Element {
       <p className="mt-2 text-xs text-ink-soft">Los números tachados ya están vendidos.</p>
       <p className="mt-2 text-xs text-blue-800">Boletas sin pagar no juegan.</p>
 
-      <p className="numeric mt-4 inline-block bg-lottery px-3 py-2 text-2xl font-semibold">
-        {formatMoney(raffle.ticketPriceMinorUnits, raffle.currency)} cada boleta
+      <p className="numeric mt-4 inline-block bg-lottery px-3 py-2 text-sm font-semibold">
+        {formatMoney(raffle.ticketPriceMinorUnits, raffle.currency)} CADA BOLETA
       </p>
 
       {raffle.lotteryReference === null ? null : (
