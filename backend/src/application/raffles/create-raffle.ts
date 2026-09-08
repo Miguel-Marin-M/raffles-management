@@ -23,6 +23,9 @@ export interface CreateRaffleCommand {
   readonly numberDigits?: number;
   readonly drawDate?: Date | null;
   readonly lotteryReference?: string | null;
+  readonly organizerName?: string | null;
+  readonly bankName?: string | null;
+  readonly bankAccount?: string | null;
   readonly prizes?: readonly PrizeInput[];
   readonly status?: RaffleStatus;
 }
@@ -56,6 +59,9 @@ export class CreateRaffle {
       range,
       drawDate: command.drawDate ?? null,
       lotteryReference: command.lotteryReference ?? null,
+      organizerName: command.organizerName ?? null,
+      bankName: command.bankName ?? null,
+      bankAccount: command.bankAccount ?? null,
       status: command.status ?? 'draft',
       prizes: (command.prizes ?? []).map((prize, index) =>
         Prize.create({

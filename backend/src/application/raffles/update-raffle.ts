@@ -14,6 +14,9 @@ export interface UpdateRaffleCommand {
   readonly ticketPriceMinorUnits?: number;
   readonly drawDate?: Date | null;
   readonly lotteryReference?: string | null;
+  readonly organizerName?: string | null;
+  readonly bankName?: string | null;
+  readonly bankAccount?: string | null;
   /** When present, replaces the whole prize list in the given order. */
   readonly prizes?: readonly PrizeInput[];
 }
@@ -48,6 +51,9 @@ export class UpdateRaffle {
       ...(command.lotteryReference !== undefined
         ? { lotteryReference: command.lotteryReference }
         : {}),
+      ...(command.organizerName !== undefined ? { organizerName: command.organizerName } : {}),
+      ...(command.bankName !== undefined ? { bankName: command.bankName } : {}),
+      ...(command.bankAccount !== undefined ? { bankAccount: command.bankAccount } : {}),
     });
 
     if (command.prizes !== undefined) {

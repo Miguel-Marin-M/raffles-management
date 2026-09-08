@@ -50,6 +50,37 @@ describe('UpdateRaffle', () => {
     expect(updated.ticketPriceMinorUnits).toBe(10_000);
   });
 
+  it('edits one contact detail without clearing the others', async () => {
+    const created = await create({
+      organizerName: 'Miguel Marín',
+      bankName: 'Nequi',
+      bankAccount: '3003318790',
+    });
+
+    const updated = await updateRaffle.execute({
+      actorId: OWNER_ID,
+      raffleId: created.id,
+      bankAccount: '3001112233',
+    });
+
+    expect(updated.organizerName).toBe('Miguel Marín');
+    expect(updated.bankName).toBe('Nequi');
+    expect(updated.bankAccount).toBe('3001112233');
+  });
+
+  it('clears a contact detail sent as null', async () => {
+    const created = await create({ bankName: 'Nequi', bankAccount: '3003318790' });
+
+    const updated = await updateRaffle.execute({
+      actorId: OWNER_ID,
+      raffleId: created.id,
+      bankAccount: null,
+    });
+
+    expect(updated.bankName).toBe('Nequi');
+    expect(updated.bankAccount).toBeNull();
+  });
+
   it('replaces the whole prize list', async () => {
     const created = await create({ prizes: [{ title: 'Moto' }, { title: 'Televisor' }] });
 

@@ -17,6 +17,17 @@ import { Prize, type PrizeSnapshot } from './prize.js';
 
 export type RaffleStatus = 'draft' | 'active' | 'closed';
 
+/** Who answers for the raffle and where the money is collected. */
+interface OrganizerContact {
+  readonly organizerName: string | null;
+  readonly bankName: string | null;
+  readonly bankAccount: string | null;
+}
+
+type ContactInput = {
+  readonly [K in keyof OrganizerContact]?: string | null;
+};
+
 export interface RaffleSnapshot {
   readonly id: string;
   readonly ownerId: string;
@@ -29,6 +40,9 @@ export interface RaffleSnapshot {
   readonly numberDigits: number;
   readonly drawDate: Date | null;
   readonly lotteryReference: string | null;
+  readonly organizerName: string | null;
+  readonly bankName: string | null;
+  readonly bankAccount: string | null;
   readonly status: RaffleStatus;
   readonly prizes: readonly PrizeSnapshot[];
   readonly createdAt: Date;
@@ -50,6 +64,7 @@ export class Raffle {
     private currentRange: NumberRange,
     private currentDrawDate: Date | null,
     private currentLotteryReference: string | null,
+    private currentContact: OrganizerContact,
     private currentStatus: RaffleStatus,
     private currentPrizes: Prize[],
     readonly createdAt: Date,
@@ -65,6 +80,9 @@ export class Raffle {
     description?: string | null;
     drawDate?: Date | null;
     lotteryReference?: string | null;
+    organizerName?: string | null;
+    bankName?: string | null;
+    bankAccount?: string | null;
     prizes?: readonly Prize[];
     status?: RaffleStatus;
   }): Raffle {
@@ -81,6 +99,7 @@ export class Raffle {
       input.range,
       input.drawDate ?? null,
       Raffle.normalizeText(input.lotteryReference),
+      Raffle.normalizeContact(input),
       input.status ?? 'draft',
       Raffle.validatePrizes(input.prizes ?? []),
       input.createdAt,
@@ -97,6 +116,7 @@ export class Raffle {
       NumberRange.create(snapshot.numberMin, snapshot.numberMax, snapshot.numberDigits),
       snapshot.drawDate,
       snapshot.lotteryReference,
+      Raffle.normalizeContact(snapshot),
       snapshot.status,
       snapshot.prizes.map((prize) => Prize.restore(prize)),
       snapshot.createdAt,
@@ -125,6 +145,18 @@ export class Raffle {
 
   get lotteryReference(): string | null {
     return this.currentLotteryReference;
+  }
+
+  get organizerName(): string | null {
+    return this.currentContact.organizerName;
+  }
+
+  get bankName(): string | null {
+    return this.currentContact.bankName;
+  }
+
+  get bankAccount(): string | null {
+    return this.currentContact.bankAccount;
   }
 
   get status(): RaffleStatus {
@@ -182,6 +214,9 @@ export class Raffle {
     ticketPrice?: Money;
     drawDate?: Date | null;
     lotteryReference?: string | null;
+    organizerName?: string | null;
+    bankName?: string | null;
+    bankAccount?: string | null;
   }): void {
     if (input.name !== undefined) this.currentName = Raffle.normalizeName(input.name);
     if (input.description !== undefined) {
@@ -197,6 +232,7 @@ export class Raffle {
     if (input.lotteryReference !== undefined) {
       this.currentLotteryReference = Raffle.normalizeText(input.lotteryReference);
     }
+    this.currentContact = this.mergeContact(input);
   }
 
   /**
@@ -293,6 +329,9 @@ export class Raffle {
       numberDigits: this.currentRange.digits,
       drawDate: this.currentDrawDate,
       lotteryReference: this.currentLotteryReference,
+      organizerName: this.currentContact.organizerName,
+      bankName: this.currentContact.bankName,
+      bankAccount: this.currentContact.bankAccount,
       status: this.currentStatus,
       prizes: this.currentPrizes.map((prize) => prize.toSnapshot()),
       createdAt: this.createdAt,
@@ -314,6 +353,26 @@ export class Raffle {
     const trimmed = name.trim().replace(/\s+/g, ' ');
     if (trimmed === '') throw new ValidationError('Raffle name cannot be empty');
     return trimmed;
+  }
+
+  /** Leaves out what the caller did not send, so a partial edit keeps the rest. */
+  private mergeContact(input: ContactInput): OrganizerContact {
+    const kept = <K extends keyof OrganizerContact>(key: K): string | null =>
+      input[key] === undefined ? this.currentContact[key] : Raffle.normalizeText(input[key]);
+
+    return {
+      organizerName: kept('organizerName'),
+      bankName: kept('bankName'),
+      bankAccount: kept('bankAccount'),
+    };
+  }
+
+  private static normalizeContact(input: ContactInput): OrganizerContact {
+    return {
+      organizerName: Raffle.normalizeText(input.organizerName),
+      bankName: Raffle.normalizeText(input.bankName),
+      bankAccount: Raffle.normalizeText(input.bankAccount),
+    };
   }
 
   private static normalizeText(value: string | null | undefined): string | null {

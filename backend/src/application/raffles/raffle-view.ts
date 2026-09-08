@@ -20,6 +20,9 @@ export interface RaffleView {
   readonly ticketCount: number;
   readonly drawDate: string | null;
   readonly lotteryReference: string | null;
+  readonly organizerName: string | null;
+  readonly bankName: string | null;
+  readonly bankAccount: string | null;
   readonly status: RaffleStatus;
   readonly prizes: readonly PrizeView[];
   readonly createdAt: string;
@@ -44,6 +47,9 @@ export function toRaffleView(raffle: Raffle): RaffleView {
     ticketCount: raffle.range.size,
     drawDate: raffle.drawDate?.toISOString() ?? null,
     lotteryReference: raffle.lotteryReference,
+    organizerName: raffle.organizerName,
+    bankName: raffle.bankName,
+    bankAccount: raffle.bankAccount,
     status: raffle.status,
     prizes: raffle.prizes.map((prize) => ({
       id: prize.id,

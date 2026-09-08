@@ -39,6 +39,9 @@ const createRaffleSchema = z.object({
   numberDigits: z.number().int().min(1).max(6).optional(),
   drawDate: z.iso.datetime().nullish(),
   lotteryReference: z.string().nullish(),
+  organizerName: z.string().nullish(),
+  bankName: z.string().nullish(),
+  bankAccount: z.string().nullish(),
   prizes: z.array(prizeSchema).optional(),
   status: z.enum(['draft', 'active', 'closed']).optional(),
 });
