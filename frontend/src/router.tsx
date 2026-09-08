@@ -4,6 +4,7 @@ import { HistoryScreen } from './routes/HistoryScreen';
 import { RafflesScreen } from './routes/RafflesScreen';
 import { BoardTab } from './routes/board/BoardTab';
 import { CustomersTab } from './routes/board/CustomersTab';
+import { parseCustomersSearch } from './routes/board/customers-search';
 import { PosterTab } from './routes/board/PosterTab';
 import { RaffleLayout } from './routes/board/RaffleLayout';
 import { SummaryTab } from './routes/board/SummaryTab';
@@ -56,6 +57,8 @@ const customersRoute = createRoute({
   getParentRoute: () => raffleRoute,
   path: '/customers',
   component: CustomersTab,
+  // The filter and the page live in the URL, not in component state.
+  validateSearch: parseCustomersSearch,
 });
 
 const posterRoute = createRoute({
