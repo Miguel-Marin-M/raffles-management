@@ -25,6 +25,10 @@ export interface Raffle {
   readonly ticketCount: number;
   readonly drawDate: string | null;
   readonly lotteryReference: string | null;
+  /** Printed on the poster; all three are optional. */
+  readonly organizerName: string | null;
+  readonly bankName: string | null;
+  readonly bankAccount: string | null;
   readonly status: RaffleStatus;
   readonly prizes: readonly Prize[];
   readonly createdAt: string;
@@ -73,6 +77,9 @@ export interface CreateRaffleInput {
   readonly numberDigits?: number;
   readonly drawDate?: string | null;
   readonly lotteryReference?: string | null;
+  readonly organizerName?: string | null;
+  readonly bankName?: string | null;
+  readonly bankAccount?: string | null;
   readonly prizes?: readonly PrizeInput[];
   readonly status?: RaffleStatus;
 }

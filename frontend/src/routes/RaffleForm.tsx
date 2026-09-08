@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 
+import { useSession } from '../features/auth/use-session';
 import type { CreateRaffleInput, Raffle } from '../lib/raffles-api';
 
 interface RaffleFormProps {
@@ -28,6 +29,9 @@ function toDateInput(iso: string | null | undefined): string {
  *
  * The number range only appears while creating: once boletas are out there,
  * moving the range would strand the numbers people already bought.
+ *
+ * The poster details are optional and default to the account holder, who is
+ * whoever is answering for the raffle unless they say otherwise.
  */
 export function RaffleForm({
   busy,
@@ -36,6 +40,7 @@ export function RaffleForm({
   initial,
 }: RaffleFormProps): React.JSX.Element {
   const editing = initial !== undefined;
+  const { user } = useSession();
 
   const [name, setName] = useState(initial?.name ?? '');
   const [price, setPrice] = useState(
@@ -44,6 +49,9 @@ export function RaffleForm({
   const [rangeIndex, setRangeIndex] = useState(0);
   const [lottery, setLottery] = useState(initial?.lotteryReference ?? '');
   const [drawDate, setDrawDate] = useState(toDateInput(initial?.drawDate));
+  const [organizer, setOrganizer] = useState(initial?.organizerName ?? user?.name ?? '');
+  const [bank, setBank] = useState(initial?.bankName ?? '');
+  const [account, setAccount] = useState(initial?.bankAccount ?? '');
   const [prizes, setPrizes] = useState<string[]>(
     initial === undefined || initial.prizes.length === 0
       ? ['']
@@ -60,6 +68,9 @@ export function RaffleForm({
       ticketPriceMinorUnits: Number(price),
       lotteryReference: lottery === '' ? null : lottery,
       drawDate: drawDate === '' ? null : new Date(`${drawDate}T12:00:00`).toISOString(),
+      organizerName: organizer === '' ? null : organizer,
+      bankName: bank === '' ? null : bank,
+      bankAccount: account === '' ? null : account,
       prizes: prizes
         .map((title) => title.trim())
         .filter((title) => title !== '')
@@ -164,6 +175,49 @@ export function RaffleForm({
           />
         </label>
       </div>
+
+      <fieldset className="flex flex-col gap-3">
+        <legend className="eyebrow">Datos del afiche</legend>
+        <p className="text-xs text-ink-soft">
+          Aparecen al pie del afiche que compartes. Puedes dejarlos vacíos.
+        </p>
+        <label className="flex flex-col gap-1">
+          <span className="eyebrow">Responsable</span>
+          <input
+            className="field"
+            value={organizer}
+            onChange={(event) => {
+              setOrganizer(event.target.value);
+            }}
+            placeholder="Quién responde por la rifa"
+          />
+        </label>
+        <div className="grid grid-cols-2 gap-3">
+          <label className="flex flex-col gap-1">
+            <span className="eyebrow">Entidad bancaria</span>
+            <input
+              className="field"
+              value={bank}
+              onChange={(event) => {
+                setBank(event.target.value);
+              }}
+              placeholder="Dónde recibes el dinero"
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="eyebrow">Número de cuenta</span>
+            <input
+              className="field numeric"
+              inputMode="numeric"
+              value={account}
+              onChange={(event) => {
+                setAccount(event.target.value);
+              }}
+              placeholder="A dónde consignan"
+            />
+          </label>
+        </div>
+      </fieldset>
 
       <fieldset className="flex flex-col gap-2">
         <legend className="eyebrow">Premios</legend>
