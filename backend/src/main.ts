@@ -51,7 +51,24 @@ async function bootstrap(): Promise<void> {
   console.log(`API listening on http://localhost:${config.API_PORT}/${config.API_PREFIX}`);
 }
 
+/**
+ * A busy port is the most common way this fails, and a stack trace buries the
+ * one thing worth knowing: another instance is already running.
+ */
+function isPortTaken(error: unknown): boolean {
+  return (error as { code?: string } | null)?.code === 'EADDRINUSE';
+}
+
 bootstrap().catch((error: unknown) => {
-  console.error('The API failed to start:', error);
+  if (isPortTaken(error)) {
+    const port = process.env['API_PORT'] ?? '3000';
+    console.error(
+      `Port ${port} is already in use. Another API instance is probably still ` +
+        `running: close that terminal, or set API_PORT to a free port.`,
+    );
+  } else {
+    console.error('The API failed to start:', error);
+  }
+
   process.exitCode = 1;
 });
