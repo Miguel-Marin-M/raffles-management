@@ -13,6 +13,11 @@ interface CustomersPanelProps {
   readonly raffle: Raffle;
   readonly takenCells: readonly BoardCell[];
   readonly busy: boolean;
+  /** Filter and page come from the URL, so a reload or a shared link keeps them. */
+  readonly query: string;
+  readonly page: number;
+  readonly onQueryChange: (query: string) => void;
+  readonly onPageChange: (page: number) => void;
   readonly onOpenCell: (cell: BoardCell) => void;
   readonly onMarkAsPaid: (numbers: readonly number[]) => void;
   readonly onRelease: (numbers: readonly number[]) => void;
@@ -51,6 +56,10 @@ export function CustomersPanel({
   raffle,
   takenCells,
   busy,
+  query,
+  page,
+  onQueryChange,
+  onPageChange,
   onOpenCell,
   onMarkAsPaid,
   onRelease,
@@ -71,8 +80,6 @@ export function CustomersPanel({
   const [paying, setPaying] = useState(false);
   const [amount, setAmount] = useState('');
   const [newCustomer, setNewCustomer] = useState<CustomerInput | null>(null);
-  const [query, setQuery] = useState('');
-  const [page, setPage] = useState(1);
 
   const rows = useMemo(() => {
     const grouped = new Map<string, CustomerRow>();
@@ -175,8 +182,7 @@ export function CustomersPanel({
             type="search"
             value={query}
             onChange={(event) => {
-              setQuery(event.target.value);
-              setPage(1);
+              onQueryChange(event.target.value);
             }}
             placeholder="Nombre o teléfono del cliente"
           />
@@ -185,8 +191,7 @@ export function CustomersPanel({
               type="button"
               className="btn btn-secondary"
               onClick={() => {
-                setQuery('');
-                setPage(1);
+                onQueryChange('');
               }}
             >
               Limpiar
@@ -302,7 +307,7 @@ export function CustomersPanel({
               className="btn btn-secondary"
               disabled={currentPage === 1}
               onClick={() => {
-                setPage(currentPage - 1);
+                onPageChange(currentPage - 1);
               }}
             >
               ← Anterior
@@ -315,7 +320,7 @@ export function CustomersPanel({
               className="btn btn-secondary"
               disabled={currentPage === pageCount}
               onClick={() => {
-                setPage(currentPage + 1);
+                onPageChange(currentPage + 1);
               }}
             >
               Siguiente →
