@@ -32,6 +32,16 @@ export function Poster({ board }: PosterProps): React.JSX.Element {
 
   const drawDate = formatDayMonth(raffle.drawDate);
 
+  /**
+   * Where the money goes, labelled with the bank so it reads the way people
+   * write it in a chat. Either half can be missing, and a bank with no account
+   * number is not something a buyer can act on.
+   */
+  const payTo =
+    raffle.bankAccount === null
+      ? null
+      : { label: raffle.bankName ?? 'Cuenta', value: raffle.bankAccount };
+
   function winnerName(number: number): string | null {
     return takenCells.find((cell) => cell.number === number)?.customerName ?? null;
   }
@@ -86,10 +96,21 @@ export function Poster({ board }: PosterProps): React.JSX.Element {
         </ol>
       ) : null}
 
-      <div className="flex align-middle justify-between mt-6">
-        <p className="mt-2 text-xs text-ink-soft"><span className="font-bold">Responsable:</span> Miguel Marín</p>
-        <p className="mt-2 text-xs text-ink-soft"><span className="font-bold">NEQUI:</span> 3003318790</p>
-      </div>      
+      {raffle.organizerName === null && payTo === null ? null : (
+        <div className="mt-6 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-xs text-ink-soft">
+          {raffle.organizerName === null ? null : (
+            <p>
+              <span className="font-bold">Responsable:</span> {raffle.organizerName}
+            </p>
+          )}
+          {payTo === null ? null : (
+            <p>
+              <span className="font-bold">{payTo.label}:</span>{' '}
+              <span className="numeric">{payTo.value}</span>
+            </p>
+          )}
+        </div>
+      )}
       <div className="mt-7 grid grid-cols-10 gap-x-1 gap-y-1.5">
         {numbers.map((value) => {
           const sold = taken.has(value);
