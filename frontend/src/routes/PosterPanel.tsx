@@ -86,6 +86,10 @@ export function Poster({ board }: PosterProps): React.JSX.Element {
         </ol>
       ) : null}
 
+      <div className="flex align-middle justify-between mt-6">
+        <p className="mt-2 text-xs text-ink-soft"><span className="font-bold">Responsable:</span> Miguel Marín</p>
+        <p className="mt-2 text-xs text-ink-soft"><span className="font-bold">NEQUI:</span> 3003318790</p>
+      </div>      
       <div className="mt-7 grid grid-cols-10 gap-x-1 gap-y-1.5">
         {numbers.map((value) => {
           const sold = taken.has(value);
@@ -107,6 +111,7 @@ export function Poster({ board }: PosterProps): React.JSX.Element {
       </div>
 
       <p className="mt-2 text-xs text-ink-soft">Los números tachados ya están vendidos.</p>
+      <p className="mt-2 text-xs text-blue-800">Boletas sin pagar no juegan.</p>
 
       <p className="numeric mt-4 inline-block bg-lottery px-3 py-2 text-2xl font-semibold">
         {formatMoney(raffle.ticketPriceMinorUnits, raffle.currency)} cada boleta
