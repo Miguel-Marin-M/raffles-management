@@ -1,5 +1,5 @@
 {
-  "name": "@rifas/api",
+  "name": "@raffles/api",
   "version": "0.1.0",
   "private": true,
   "description": "Raffle management API: domain, use cases and persistence",

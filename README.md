@@ -12,8 +12,8 @@ reserve tickets themselves.
 rifas/
 ├─ docker/             local infrastructure configuration
 ├─ docker-compose.yml  PostgreSQL and Adminer, development only
-├─ backend/            @rifas/api  — REST API, domain, business rules and persistence
-└─ frontend/           @rifas/web  — mobile-first admin panel (React + Vite)
+├─ backend/            @raffles/api  — REST API, domain, business rules and persistence
+└─ frontend/           @raffles/web  — mobile-first admin panel (React + Vite)
 ```
 
 The schema and migrations live in `backend/src/infrastructure/database`, next to
@@ -40,7 +40,7 @@ PostgreSQL is published on port **5434** to avoid clashing with a host
 PostgreSQL install, Adminer is available at <http://localhost:8080> and the API
 documents itself at <http://localhost:3000/api/docs>.
 
-The panel is a PWA: `pnpm --filter @rifas/web build` emits a service worker that
+The panel is a PWA: `pnpm --filter @raffles/web build` emits a service worker that
 precaches the app shell so it opens without a connection. API requests are
 deliberately never cached — a board served from a stale cache would show numbers
 as free that somebody had already taken, which is the one mistake this system
@@ -61,7 +61,7 @@ exactly one ticket behind.
 
 ## Deployment
 
-The API is a plain Node process: `pnpm --filter @rifas/api build` and then
+The API is a plain Node process: `pnpm --filter @raffles/api build` and then
 `node dist/main.js`, with the migrations applied first through
 `node dist/infrastructure/database/migrate.js`. The panel compiles to static
 files under `frontend/dist` and needs no server of its own.
