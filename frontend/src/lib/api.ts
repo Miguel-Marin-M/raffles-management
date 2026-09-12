@@ -67,7 +67,7 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
 
   if (response.status === 401 && options.skipRefresh !== true) {
     const refreshed = await refreshSession();
-    if (refreshed) return request<T>(path, { ...options, skipRefresh: true });
+    if (refreshed !== null) return request<T>(path, { ...options, skipRefresh: true });
   }
 
   const payload = await parse(response);
@@ -86,17 +86,23 @@ export interface Session {
   readonly user: { id: string; email: string; name: string | null };
 }
 
-/** Swaps the refresh cookie for a fresh access token; false when there is no session. */
-export async function refreshSession(): Promise<boolean> {
+/**
+ * Swaps the refresh cookie for a fresh access token and returns the organizer
+ * it belongs to, or null when there is no session.
+ *
+ * The endpoint already answers with the user, so returning it here saves the
+ * caller a second round trip on a connection that may be waking up.
+ */
+export async function refreshSession(): Promise<Session['user'] | null> {
   try {
     const session = await request<Session>('/auth/refresh', {
       method: 'POST',
       skipRefresh: true,
     });
     setAccessToken(session.accessToken);
-    return true;
+    return session.user;
   } catch {
     setAccessToken(null);
-    return false;
+    return null;
   }
 }

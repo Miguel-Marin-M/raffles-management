@@ -9,20 +9,15 @@ export function SessionProvider({ children }: { children: React.ReactNode }): Re
   const [status, setStatus] = useState<'checking' | 'ready'>('checking');
 
   // A reload keeps the session: the refresh cookie is exchanged for a new
-  // access token before the first screen is painted.
+  // access token before the first screen is painted. That single call also
+  // names the organizer, so nothing else has to be fetched to start.
   useEffect(() => {
     let cancelled = false;
 
     void (async () => {
       const restored = await refreshSession();
       if (cancelled) return;
-      if (restored) {
-        try {
-          setUser(await api.me());
-        } catch {
-          setUser(null);
-        }
-      }
+      setUser(restored);
       setStatus('ready');
     })();
 
